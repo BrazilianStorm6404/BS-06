@@ -19,33 +19,29 @@ public class Drivetrain extends SubsystemBase {
   //#region CRIACAO DAS VARIAVEIS
 
   // GIROSCÓPIO
-  private ADXRS450_Gyro _gyro;
+  private ADXRS450_Gyro sn_gyro;
 
   // METODO DE CONTAGEM CONTINUA
-  private double _d        = 0;
-  private double _e        = 0;
-  private int _revolutionD = 0;
-  private int _revolutionE = 0;
+  private double d = 0, e = 0;
+  private int revD = 0, revE = 0;
 
   // ANGULO DE ROTAÇAO
-  private double _angle = 0;
+  private double angle = 0;
 
   // CORRECAO DE PID
-  private double _correction; //Correçao de direçao
-  private double _correctionVel; //Correçao de velocidade 
-  private PIDController _autDirPID;
-  private PIDController _autEncPID;
+  private double corrct, corrctVel; //Correçao de velocidade 
+  private PIDController _autDirPID, _autEncPID;
 
-  // CRIANDO OS CONTROLADORES DO SISTEMA DE TRACAO  
-  private WPI_TalonSRX _lFront, _lBack, _rFront, _rBack;
+  // CRIANDO OS CONTROLADORES DO SISTEMA DE TRACAO
+  private WPI_TalonSRX ct_lFront, ct_lBack, ct_rFront, ct_rBack;
   
   // CRIANDO O AGRUPAMENTO DOS CONTROLADORES
-  private MotorControllerGroup _left, _right;
+  private MotorControllerGroup left, right;
   
   // CRIANDO O DIFERENCIAL DO SISTEMA DE TRACAO
   private DifferentialDrive _drive;
 
-  private Timer moveTime;
+  private Timer t_moveTime;
 
   //#endregion
 
@@ -55,34 +51,39 @@ public class Drivetrain extends SubsystemBase {
 
     // DEFININDO OS CONTROLADORES DO SISTEMA DE TRACAO 
 
-    _lFront = new WPI_TalonSRX (Constants.Motors.Drivetrain._left_front);
-    _lBack  = new WPI_TalonSRX (Constants.Motors.Drivetrain._left_back);
-    _rFront = new WPI_TalonSRX (Constants.Motors.Drivetrain._right_front);
-    _rBack  = new WPI_TalonSRX (Constants.Motors.Drivetrain._right_back);
+    try {
+      ct_lFront = new WPI_TalonSRX (Constants.Motors.Drivetrain.LEFT_FRONT);
+      ct_lBack  = new WPI_TalonSRX (Constants.Motors.Drivetrain.LEFT_BACK);
+      ct_rFront = new WPI_TalonSRX (Constants.Motors.Drivetrain.RIGHT_FRONT);
+      ct_rBack  = new WPI_TalonSRX (Constants.Motors.Drivetrain.RIGHT_BACK);
+    } catch (Exception ex) {
+      System.out.println("Erro na busca de controlador");
+
+    }
     
     // DEFININDO OS AGRUPAMENTO DOS CONTROLADORES
-    _left  = new MotorControllerGroup(_lFront, _lBack);
-    _right = new MotorControllerGroup(_rFront, _rBack);
+    left  = new MotorControllerGroup(ct_lFront, ct_lBack);
+    right = new MotorControllerGroup(ct_rFront, ct_rBack);
 
     // DEFININDO O DIFERENCIAL DO SISTEMA DE TRACAO
-    _drive = new DifferentialDrive(_left, _right);
+    _drive = new DifferentialDrive(left, right);
     
     // CONFIGURAÇAO GYRO
-    _gyro = new ADXRS450_Gyro(Port.kOnboardCS0);
-    _gyro.calibrate();
+    sn_gyro = new ADXRS450_Gyro(Port.kOnboardCS0);
+    sn_gyro.calibrate();
 
     // PARAMETROS PID
     _autDirPID.setPID(0.001, 0, 0);
     _autEncPID.setPID(0.001, 0, 0);
     
     // CONFIGURAÇAO DOS ENCODERS
-    _lFront.configFactoryDefault();
-    _rFront.configFactoryDefault();
-    //_lFront.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 30);
-    //_rFront.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 30);
+    ct_lFront.configFactoryDefault();
+    ct_rFront.configFactoryDefault();
+    //ct_lFront.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 30);
+    //ct_rFront.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 30);
 
-    moveTime = new Timer();
-    moveTime.start();
+    t_moveTime = new Timer();
+    t_moveTime.start();
 
     //#endregion
 
@@ -95,55 +96,55 @@ public class Drivetrain extends SubsystemBase {
 
   // RETORNA ANGULO DO GYRO
   public double gyroAngle () { 
-    return _gyro.getAngle();
+    return sn_gyro.getAngle();
   }
 
   // MOVE EM UMA DIREÇAO
   public void move (double vel, double dir) {
 
-    _angle += dir;
-    _autDirPID.setSetpoint(_angle);
-    direction(vel, _correction);
+    angle += dir;
+    _autDirPID.setSetpoint(angle);
+    direction(vel, corrct);
 
   }
 
   // MOVE UMA DISTANCIA EM UMA DIREÇAO
-  public void distancia (double vel, double dir, double dis) {
+  public void distancia (double vel, double dir, double dist) {
 
     // RESET ENCODERS
     //_lFront.setSelectedSensorPosition(0);
     //_rFront.setSelectedSensorPosition(0);
 
-    moveTime.reset();
+    t_moveTime.reset();
 
-    _autEncPID.setSetpoint(dis / 80);// * 22);
+    _autEncPID.setSetpoint(dist / 80);// * 22);
 
-    move(_correctionVel * vel, dir);
+    move(corrctVel * vel, dir);
     
   }
 
   // CONVERTE VALOR PERIODICO DOS ENCODERS PARA CONTINUO
   public double vc (char lado) {
 
-    if (3000 < Math.abs(_d - _rFront.getSelectedSensorPosition(1))){
+    if (3000 < Math.abs(d - ct_rFront.getSelectedSensorPosition(1))){
 
-      if (_d > _rFront.getSelectedSensorPosition(1)) _revolutionD ++;
-      else _revolutionD --;
-
-    }
-
-    if (3000 < Math.abs(_e - _lFront.getSelectedSensorPosition(0))){
-
-      if (_e > _lFront.getSelectedSensorPosition(0)) _revolutionE ++;
-      else _revolutionE --;
+      if (d > ct_rFront.getSelectedSensorPosition(1)) revD ++;
+      else revD --;
 
     }
 
-    _e = _lFront.getSelectedSensorPosition(0);
-    _d = _rFront.getSelectedSensorPosition(1);
+    if (3000 < Math.abs(e - ct_lFront.getSelectedSensorPosition(0))){
 
-    if (lado == 'd') return _revolutionD * 4094  + _d;
-    else return _revolutionE * 4094  + _e;
+      if (e > ct_lFront.getSelectedSensorPosition(0)) revE ++;
+      else revE --;
+
+    }
+
+    e = ct_lFront.getSelectedSensorPosition(0);
+    d = ct_rFront.getSelectedSensorPosition(1);
+
+    if (lado == 'd') return revD * 4094  + d;
+    else return revE * 4094  + e;
 
   }
 
@@ -151,9 +152,9 @@ public class Drivetrain extends SubsystemBase {
   @Override
   public void periodic() {
 
-    SmartDashboard.putNumber("gyro", _gyro.getAngle());
-    _correction    = _autDirPID.calculate(moveTime.get());//_gyro.getAngle());
-    _correctionVel = _autEncPID.calculate((vc('e') + vc('d')) / 2);
+    SmartDashboard.putNumber("gyro", sn_gyro.getAngle());
+    corrct    = _autDirPID.calculate(t_moveTime.get());//_gyro.getAngle());
+    corrctVel = _autEncPID.calculate((vc('e') + vc('d')) / 2);
 
   }
 }

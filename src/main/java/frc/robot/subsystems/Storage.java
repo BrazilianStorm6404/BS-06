@@ -1,8 +1,13 @@
 
 package frc.robot.subsystems;
-
 // IMPORTS
+import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
+import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -12,28 +17,42 @@ import frc.robot.Constants;
 public class Storage extends SubsystemBase {
 
   // CRIANDO OS CONTROLADORES DO SISTEMA DE ARAMAZENADOR
-  private WPI_TalonSRX _storage;
+  private VictorSPX ct_feeder;
+  private CANSparkMax ct_conveyor;
 
   // CRIANDO OS SENSORES DO SISTEMA DE ARMAZENADOR
-  private DigitalInput _sensor_sto;
+  private DigitalInput sn_photS;
 
   public Storage() {
 
     // DEFININDO OS CONTROLADORES DO SISTEMA DE ARMAZENADOR
-    _storage = new WPI_TalonSRX(Constants.Motors.Storage._storage);
+    try {
+
+      ct_feeder   = new VictorSPX(Constants.Motors.Storage.FEEDER);
+      ct_conveyor = new CANSparkMax(Constants.Motors.Storage.CONVEYOR, MotorType.kBrushed);
+
+    } catch (Exception ex) {
+
+      System.out.println("Erro na busca de controlador: " + ex.getStackTrace()[0]);
+      
+    }
 
     // DEFININDO OS SENSORES DO SISTEMA DE ARMAZENADOR
-    _sensor_sto = new DigitalInput(Constants.Sensors._sensor_stor);
+    sn_photS = new DigitalInput(Constants.Sensors.STORAGE);
   }
 
   // CRIANDO FUNCAO DO ARMAZENADOR
-  public void stor(double vel) {
-    _storage.set(vel);
+  public void setFeeder(double vel) {
+    ct_feeder.set(VictorSPXControlMode.PercentOutput, vel);
+  }
+
+  public void setConveyor(double vel) {
+    ct_conveyor.set(vel);
   }
 
   // CRIANDO FUNCAO DOS SENSORES
   public boolean sensorS1() {
-    return _sensor_sto.get();
+    return sn_photS.get();
   }
 
   @Override

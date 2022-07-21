@@ -21,8 +21,18 @@ public class Camera extends SubsystemBase {
     new Thread(() -> {
 
       // Criacao da camera
-      UsbCamera camera = CameraServer.startAutomaticCapture();
-      camera.setResolution(640, 480); //resolucao da camera
+      try {
+
+        UsbCamera vs_camera = CameraServer.startAutomaticCapture();
+        vs_camera.setResolution(640, 480); //resolucao da camera
+
+      
+      } catch (Exception ex){
+
+        System.out.println("Erro na busca de camera");
+        return;
+
+      }
 
       // Criacao da resolucao da camera
       CvSink cvsink = CameraServer.getVideo();

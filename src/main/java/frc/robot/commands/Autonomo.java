@@ -65,9 +65,9 @@ public class Autonomo extends CommandBase {
 
     //Storage
     if (t_sto.get() < 3) {
-      _sto.stor(0.1);
+      _sto.setFeeder(0.1);
     } else {
-      _sto.stor(0);
+      _sto.setFeeder(0);
     }
 
     //*/

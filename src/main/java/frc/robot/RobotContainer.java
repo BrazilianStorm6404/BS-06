@@ -7,8 +7,8 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import frc.robot.Constants.Motors.Climber;
 import frc.robot.commands.Autonomo;
+import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Collector;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Drive;
@@ -22,28 +22,22 @@ public class RobotContainer {
   //#region CRIANDO OS OBJETOS
 
   // CONTROLES (PILOTO E CO_PILOTO)
-  XboxController pilot;
-  XboxController co_pilot;
+  XboxController pilot, coPilot;
 
   // SUBSISTEMA COM PADRAO M_ NA FRENTE
-  Autonomo c_auto;
-
-  Drivetrain m_drive;
-  Collector m_coll;
-  Storage m_stor;
-  Climber m_climb;
-  Shooter m_shot;
-  Tests m_test;
-  Drive m_Drive;
+  Autonomo cm_auto;
+  Drivetrain sb_drive;
+  Collector sb_collector;
+  Storage sb_storge;
+  Climber sb_climber;
+  Shooter sb_shooter;
+  Tests sb_test;
+  Drive sb_Drive;
 
   // COMANDO COM PADRAO C_ NA FRENTE
-  Timer _d;
+  Timer t_tPitch, t_tStor;
 
-  // SENSORES, ETC PADRAO _ NA FRENTE
-  Timer _t;
-
-  boolean reset;
-  boolean resetSto;
+  boolean reset, resetSto;
 
 
   //#endregion
@@ -53,25 +47,24 @@ public class RobotContainer {
   //#region DEFINIÇAO
   
     // DEFININDO CONTROLES (PILOTO E CO_PILOTO)
-    pilot    = new XboxController(Constants.Control_map._pilot);
-    co_pilot = new XboxController(Constants.Control_map._co_pilot);
+    pilot   = new XboxController(Constants.Control_map.PILOT);
+    coPilot = new XboxController(Constants.Control_map.CO_PILOT);
 
     // DEFININDO SUBSISTEMAS NO CONTAINER
-    //m_drive = new Drivetrain();
-    //m_coll  = new Collector();
-    //m_shot  = new Shooter();
-    //m_stor  = new Storage();
-    //m_test  = new Tests();
-    //m_climb = new Climber();
-    m_Drive  = new Drive();
+    //sb_shot  = new Shooter();
+    sb_storge     = new Storage();
+    sb_collector  = new Collector();
+    //sb_test   	  = new Tests();
+    //sb_drive  	  = new Drivetrain();
+    //sb_climber  	  = new Climber();
+    //sb_Drive      = new Drive();
 
     // DEFININDO SENSORES, ETC
-    _t = new Timer();
-    _d = new Timer();
+    t_tStor  = new Timer();
+    t_tPitch = new Timer();
 
     resetSto = true;
-    reset = true;
-
+    reset    = true;
 
     configureButtonBindings();
  
@@ -82,76 +75,80 @@ public class RobotContainer {
   private void configureButtonBindings() {
 
     //#region DRIVETRAIN
-    /*
-    m_drive.setDefaultCommand(new RunCommand(() -> {
-      m_drive.direction(pilot.getRightX(), -pilot.getLeftY());
-    }, m_drive));
+    try {
+
+      sb_drive.setDefaultCommand(new RunCommand(() -> {
+
+        sb_drive.direction(-pilot.getLeftY(), pilot.getRightX());
+
+      }, sb_drive));
+
+    } catch (Exception ex) {
+
+      System.out.println("Erro ao executar funçoes da classe "+this.getClass());
+
+    }
     //*/
 
     //#endregion
 
     //#region COLLECTOR
-  /*
-   m_coll.setDefaultCommand(new RunCommand(() -> {
+    try {
 
-    // CONTROLE SOLENOID
-    if(co_pilot.getAButton()) {
-      m_coll.collectorSolenoid(true);
-    } else {
-      m_coll.collectorSolenoid(false);
-    }
+      sb_collector.setDefaultCommand(new RunCommand(() -> {
 
-    /*
-    // MOVE COLLECTOR
-    if (co_pilot.getLeftTriggerAxis() > 0) {
-      m_coll.move_c(0.9);
-    } else if (co_pilot.getLeftBumper()) {
-      m_coll.move_c(-0.3);
-    } else {
-      m_coll.move_c(0.0);
-    }
-    
+        // CONTROLE SOLENOID
+       /* if(co_pilot.getAButton()) sb_collector.collectorSolenoid(true);
+        else sb_collector.collectorSolenoid(false);
+       //*/
 
-    // COLLECTOR
-    if (pilot.getRightTriggerAxis() > 0) {
-      m_coll.collect(0.5);
-    } else if (pilot.getLeftTriggerAxis() > 0) {
-      m_coll.collect(-0.5);
-    } else {
-      m_coll.collect(0.0);
+        // COLLECTOR
+        if      (pilot.getRightTriggerAxis() > 0) sb_collector.collect(0.5);
+        else if (pilot.getLeftTriggerAxis()  > 0) sb_collector.collect(-0.5);
+        else if (coPilot.getRightBumper()) sb_collector.collect(-0.5);
+        else sb_collector.collect(0.0);
+      
+      }, sb_collector));
+
+    } catch (Exception ex) {
+
+      System.out.println("Erro ao executar funçoes da classe " + this.getClass());
+      System.out.println("EEEEERRO: " + ex.getMessage());
+
+      return;
+
     }
-    
-  }, m_coll));
   //*/
     
 
     //#endregion
  
     //#region SHOOTER
-    /*
-    m_shot.setDefaultCommand(new RunCommand(() -> {
+    try {
+    
+      sb_shooter.setDefaultCommand(new RunCommand(() -> {
 
       // SHOOTER
-      //m_shot.setActivate(co_pilot.getAButton());
-      //m_shot.servoMov(co_pilot.getLeftTriggerAxis()); 
+      //sb_shoter.setActivate(coPilot.getAButton());
+      //sb_shoter.servoMov(coPilot.getLeftTriggerAxis()); 
 
-      if (co_pilot.getRightTriggerAxis() > 0) {
+      if (coPilot.getLeftTriggerAxis() > 0) {
 
         if (reset) {
 
-          _t.reset();
-          _t.start();
+          t_tPitch.reset();
+          t_tPitch.start();
 
-          _d.reset();
-          _d.start();
+          t_tStor.reset();
+          t_tStor.start();
 
           reset = false;
 
-          m_shot.chute(true);
+          sb_shooter.chute(true);
 
          } else {
 
-          m_shot.chute(false);
+          sb_shooter.chute(false);
 
          }
 
@@ -159,9 +156,9 @@ public class RobotContainer {
 
         if (!reset) {
 
-          _d.start();
-          m_shot.resetPitch();
-          m_shot.setActivate(0);
+          t_tPitch.start();
+          sb_shooter.resetPitch();
+          sb_shooter.setActivate(0);
 
         }
 
@@ -170,61 +167,100 @@ public class RobotContainer {
         
       }
 
-       if (_d.get() > 3) {
-         m_shot.servoDisable();
-         _d.reset();
-         _d.stop();
+       if (t_tPitch.get() > 3) {
+         sb_shooter.servoDisable();
+        t_tPitch.reset();
+        t_tPitch.stop();
         }
 
-        SmartDashboard.putNumber("eeee", _d.get());
+        SmartDashboard.putNumber("eeee", t_tPitch.get());
         /*
-      if (!m_shot.isLimelightDetected()) m_shot.rotation(co_pilot.getRightX());
-      else m_shot.limelightYawControl(); // CONTROLE AUTOMATICO PITCH/YAW LIMELIGHT
+      if (sb_shooter.isLimelightDetected()) sb_shooter.limelightYawControl(); // CONTROLE AUTOMATICO PITCH/YAW LIMELIGHT
+      else sb_shooter.rotation(coPilot.getRightX());
+      //*/
 
-    }, m_shot));
-        //*/
+    }, sb_shooter));
+
+    } catch (Exception ex) {
+
+      System.out.println("Erro ao executar funçoes da classe " + this.getClass());
+      
+  }
+        
 
     //*/
     //#endregion
     
     //#region STORAGE
-    /*
-    m_stor.setDefaultCommand(new RunCommand(() -> {
+    try {
+
+    sb_storge.setDefaultCommand(new RunCommand(() -> {
       
       // STORAGE
-      if (pilot.getAButton() && _t >= 2) {
-        m_stor.stor(0.5);
-      } else if (pilot.getBButton()) { // igual
-        m_stor.stor(-0.5);
-      } else {
-        m_stor.stor(0);
-      }
+      if      (pilot.getRightTriggerAxis() > 0) sb_storge.setFeeder(0.75);
+      else if (pilot.getLeftTriggerAxis() > 0) sb_storge.setFeeder(-0.75);
+      else sb_storge.setFeeder(0);
 
-    }, m_stor));
+      if      (coPilot.getRightTriggerAxis() > 0) sb_storge.setConveyor(0.75);
+      else if (coPilot.getRightBumper()) sb_storge.setConveyor(-0.75);
+      else sb_storge.setFeeder(0);
+
+    }, sb_storge));
+
+    } catch (Exception ex) {
+
+    System.out.printf("Erro ao executar funçoes da classe %s (%s)", this.getClass(), ex.getStackTrace()[0]);
+
+  }
     //*/
     //#endregion
 
     //#region TESTES
-/*
-    m_test.setDefaultCommand(new RunCommand(() -> {
 
-      if (co_pilot.getBButtonReleased()){
+    try {
 
-    		m_test.moveMotionMagic(100, 0);
+      sb_test.setDefaultCommand(new RunCommand(() -> {
 
-      }
+        if (coPilot.getBButtonReleased()) sb_test.moveMotionMagic(100, 0);
 
-    }, m_test));
+
+      }, sb_test));
+
+    } catch (Exception ex) {
+
+      System.out.println("Erro ao executar funçoes da classe "+this.getClass());
+
+    }
      //*/
 
       //#endregion
-  ///*
-    m_Drive.setDefaultCommand(new RunCommand(() -> {
+  
+    //#region CLIMBER 
 
-  	  m_Drive.jaguarDrive(-co_pilot.getLeftY(), co_pilot.getRightX());
+    try{
 
-    }, m_Drive));
-    //*/
+      sb_climber.setDefaultCommand(new RunCommand(() -> {
+
+        if (coPilot.getBackButton()) {
+
+          if      (coPilot.getAButton()) sb_climber.climberSolenoidET1(true);
+          else if (coPilot.getXButton()) sb_climber.climberSolenoidET2(true);
+          else if (coPilot.getYButton()) sb_climber.climbing(0.5);
+          else sb_climber.climbing(0);
+
+        }
+
+
+      }, sb_climber));
+
+    } catch (Exception ex) {
+
+      System.out.println("Erro ao executar funçoes da classe " + this.getClass());
+
+    }
+
+    //#endregion
+   
   }
 
   // COMANDO AUTONOMO

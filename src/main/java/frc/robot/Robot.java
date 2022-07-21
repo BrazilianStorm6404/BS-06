@@ -9,13 +9,18 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 // CODE
 public class Robot extends TimedRobot {
 
-  private Command m_autonomousCommand;
-  private RobotContainer m_robotContainer;
+  private Command cm_autonomousCommand;
+  private RobotContainer _robotContainer;
 
 
   @Override
   public void robotInit() {
-    m_robotContainer = new RobotContainer();
+    try {
+      _robotContainer = new RobotContainer();
+    } catch (Exception ex) {
+      System.out.println("Erro em "+this.getClass()+": Erro ao iniciar" );
+      return;
+    }
   }
 
   @Override
@@ -31,9 +36,14 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.schedule();
+    try {
+        cm_autonomousCommand = _robotContainer.getAutonomousCommand();
+      if (cm_autonomousCommand != null) {
+        cm_autonomousCommand.schedule();
+    }
+    } catch (Exception ex) {
+      System.out.println("Erro em "+this.getClass()+": Erro ao executar código autônomo");
+      return;
     }
   }
 
@@ -42,9 +52,17 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.cancel();
+    try {
+
+      if (cm_autonomousCommand != null) {
+        cm_autonomousCommand.cancel();
+      }
+
+    } catch (Exception ex) {
+      System.out.println("Erro em "+this.getClass()+": Erro ao executar código tele-operado");
+      return;
     }
+    
   }
 
   @Override

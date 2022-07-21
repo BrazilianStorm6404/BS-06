@@ -5,48 +5,55 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 import frc.robot.Constants;
 
 // CODE
 public class Climber extends SubsystemBase {
   
   // CRIANDO OS CONTROLADORES DO SISTEMA DE ESCALADA
-  private VictorSPX _c_tube1, _c_tube2, _RsolEt1, _RsolEt2, _LsolEt1, _LsolEt2;
+  private VictorSPX ct_tube1, ct_tube2, at_rSolEt1, at_rSolEt2, at_lSolEt1, at_lSolEt2;
 
   public Climber() {
 
     // DEFININDO OS CONTROLADORS DO SISTEMA DE ESCALADA
-    _c_tube1 = new VictorSPX(Constants.Motors.Climber._climber_tube);
-    _c_tube2 = new VictorSPX(Constants.Motors.Climber._climber_tube);
+    try {
 
-    _RsolEt1 = new VictorSPX(Constants.Soleinoid._climber);
-    _RsolEt2 = new VictorSPX(Constants.Soleinoid._climber);
-    _LsolEt1 = new VictorSPX(Constants.Soleinoid._climber);
-    _LsolEt2 = new VictorSPX(Constants.Soleinoid._climber);
+      ct_tube1 = new VictorSPX(Constants.Motors.Climber.CLIMBER_LEFT_TUBE);
+      ct_tube2 = new VictorSPX(Constants.Motors.Climber.CLIMBER_RIGHT_TUBE);
 
+      at_rSolEt1 = new VictorSPX(Constants.Soleinoid.CLIMBER);
+      at_rSolEt2 = new VictorSPX(Constants.Soleinoid.CLIMBER);
+      at_lSolEt1 = new VictorSPX(Constants.Soleinoid.CLIMBER);
+      at_lSolEt2 = new VictorSPX(Constants.Soleinoid.CLIMBER);
 
+      ct_tube1.follow(ct_tube2);
+      at_lSolEt1.follow(at_rSolEt1);
+      at_lSolEt2.follow(at_rSolEt2);
+
+    } catch (Exception ex) {
+      
+      System.out.println("Erro na busca de controlador");
+
+    }
   }
 
   // FUNCAO DO SISTEMA DE ESCALADA
-  public void climbing1(double ct1) {
-    _c_tube1.set(ControlMode.PercentOutput, ct1);
-  }
+  public void climbing(double ct) {
 
-  public void climbing2(double ct2) {
-    _c_tube2.set(ControlMode.PercentOutput, ct2);
+    ct_tube1.set(ControlMode.PercentOutput, ct);
+
   }
 
   public void climberSolenoidET1 (Boolean activate){
     
-    _RsolEt1.set(ControlMode.PercentOutput, activate ? 1.0 : 0);
-    _LsolEt1.set(ControlMode.PercentOutput, activate ? 1.0 : 0);
+    at_rSolEt1.set(ControlMode.PercentOutput, activate ? 1.0 : 0);
 
   }
 
   public void climberSolenoidET2 (Boolean activate){
     
-    _RsolEt2.set(ControlMode.PercentOutput, activate ? 1.0 : 0);
-    _LsolEt2.set(ControlMode.PercentOutput, activate ? 1.0 : 0);
+    at_rSolEt2.set(ControlMode.PercentOutput, activate ? 1.0 : 0);
 
   }
 

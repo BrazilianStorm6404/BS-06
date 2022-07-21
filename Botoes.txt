@@ -1,0 +1,31 @@
+Tração:
+    direção - analógicos - cont. 1
+
+Coletor:
+    coletar - RT - cont. 1
+    liberar - LT - cont. 1
+    liberar - RB - cont. 2
+
+
+Shooter:
+    atirar - LT        - cont. 2
+    yaw    - analógico - cont. 2 
+
+Armazenador:
+    Feeder:
+        entregar - RT - cont. 1
+        liberar  - LT - cont. 1
+        entregar - RT - cont. 2
+        liberar  - RB - cont. 2
+        
+    Conveyor:
+        liberar  - LT - cont. 1
+        entregar - RT - cont. 2
+        liberar  - RB - cont. 2
+
+
+Escalada:
+    desbloquear - DpadDown - cont. 1
+    liberar     - A        - cont. 1
+    extender    - X        - cont. 1
+    subir       - Y        - cont. 1
