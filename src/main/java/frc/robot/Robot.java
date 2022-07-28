@@ -16,10 +16,14 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     try {
+
       _robotContainer = new RobotContainer();
+
     } catch (Exception ex) {
-      System.out.println("Erro em "+this.getClass()+": Erro ao iniciar" );
+
+      System.out.println("Erro em "+this.getClass()+": Erro ao iniciar");
       return;
+      
     }
   }
 
@@ -29,7 +33,14 @@ public class Robot extends TimedRobot {
 	}
 
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    try {
+      _robotContainer.disableLed();
+    } catch (Exception ex) {
+      System.out.println("Erro em "+this.getClass()+": Erro ao iniciar" );
+      return;
+    }
+  }
 
   @Override
   public void disabledPeriodic() {}

@@ -35,7 +35,7 @@ public class Camera extends SubsystemBase {
       }
 
       // Criacao da resolucao da camera
-      CvSink cvsink = CameraServer.getVideo();
+      /*CvSink cvsink = CameraServer.getVideo();
       CvSource outputStream = CameraServer.putVideo("blur", 640, 480); // nome e resolucao da camera
 
       // criacao de itens para tratamento da imagem
@@ -52,7 +52,7 @@ public class Camera extends SubsystemBase {
         // desenha no frame capturado e depois o apresenta
         Imgproc.drawMarker(source, p, s, 0, 100, 4);
         outputStream.putFrame(source);
-      }
+      } //*/
     }).start();
   }
 

@@ -9,6 +9,8 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.SparkMaxRelativeEncoder.Type;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -24,9 +26,8 @@ public class Shooter extends SubsystemBase {
 
   // #region CRIAÇAO DAS VARIAVEIS
   // CRIANDO OS CONTROLADORES DO SISTEMA DE SHOOTER, PITCH E YAW
-  //private CANSparkMax _right, _left;
-  private WPI_TalonSRX ct_left;
-  private VictorSPX ct_right, ct_yaw;
+  private CANSparkMax ct_right, ct_left;
+  private VictorSPX ct_yaw;
 
   // CRIANDO O SERVO
   private Servo at_pitchR, at_pitchL;
@@ -36,9 +37,9 @@ public class Shooter extends SubsystemBase {
   private DigitalInput sn_limitLeft, sn_limitRight;
 
   // PID ENCODER
-  private SparkMaxPIDController _encPID;
+  private SparkMaxPIDController _pidEnc;
   private RelativeEncoder sn_shotEnc;
-  private double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, rev;
+  private double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput;
 
   // LIMELGHT
   private NetworkTable table;
@@ -63,7 +64,7 @@ public class Shooter extends SubsystemBase {
     SmartDashboard.putNumber("LL Angle", 0.0);
 
     pitchPos = 0;
-    RPM      = 3400;
+    RPM      = 21000;
 
     minAngle = 16;
     maxAngle = 40;
@@ -77,9 +78,9 @@ public class Shooter extends SubsystemBase {
     //#region DEFININDO OS CONTROLADORES DO SISTEMA DE SHOOTER, PITCH E YAW
     try {
 
-      ct_yaw   = new VictorSPX(10);
-      ct_left  = new WPI_TalonSRX(1);
-      ct_right = new VictorSPX (13);
+      ct_yaw   = new VictorSPX(Constants.Motors.Shooter.YAW);
+      ct_left  = new CANSparkMax(Constants.Motors.Shooter.LEFT, MotorType.kBrushed);
+      ct_right = new CANSparkMax (Constants.Motors.Shooter.RIGHT, MotorType.kBrushed);
 
     } catch (Exception ex) {
       System.out.println("Erro na busca de controlador, linha: " + ex.getStackTrace()[0]);
@@ -107,14 +108,14 @@ public class Shooter extends SubsystemBase {
     //#endregion
 
     //#region ENCODER SHOOTER
-/*
+
     // DEFINE ENCODER SHOOTER
-    _right.restoreFactoryDefaults();
-    _shoEnc = _right.getEncoder(Type.kQuadrature, 4096);
+    ct_right.restoreFactoryDefaults();
+    sn_shotEnc = ct_right.getEncoder(Type.kQuadrature, 4096);
 
     //#region PID DE CORREÇAO DO VALOR DO ENCODER
-    _pidController = _right.getPIDController();
-    _pidController.setFeedbackDevice(_shoEnc);
+    _pidEnc = ct_right.getPIDController();
+    _pidEnc.setFeedbackDevice(sn_shotEnc);
 
     // PID COEFICIENTES
     kP         = 0.1; 
@@ -124,18 +125,23 @@ public class Shooter extends SubsystemBase {
     kFF        = 0; 
     kMaxOutput = 1; 
     kMinOutput = -1;
-    rotations  = 0.0;
 
     // DEFINE PID COEFICIENTES
-    _pidController.setP(_kP);
-    _pidController.setI(_kI);
-    _pidController.setD(_kD);
-    _pidController.setIZone(_kIz);
-    _pidController.setFF(_kFF);
-    _pidController.setOutputRange(_kMinOutput, _kMaxOutput);
+    _pidEnc.setP(kP);
+    _pidEnc.setI(kI);
+    _pidEnc.setD(kD);
+    _pidEnc.setIZone(kIz);
+    _pidEnc.setFF(kFF);
+    _pidEnc.setOutputRange(kMinOutput, kMaxOutput);
+
+    sn_shotEnc.setVelocityConversionFactor(RPM);
+
+    encoderCorrection ();
+
+    _pidEnc.setReference(0, CANSparkMax.ControlType.kVelocity);
 
     // RESET ENCODER
-    sn_shoEnc.setPosition(0.0);
+    sn_shotEnc.setPosition(0.0);
     //*/
     //#endregion
   
@@ -151,29 +157,28 @@ public class Shooter extends SubsystemBase {
     double ff  = kFF;
     double max = kMaxOutput;
     double min = kMinOutput;
-    double rot = rev;
 
-    if (p != kP)   { _encPID.setP(p); kP       = p; }
-    if (i != kI)   { _encPID.setI(i); kI       = i; }
-    if (d != kD)   { _encPID.setD(d); kD       = d; }
-    if (iz != kIz) { _encPID.setIZone(iz); kIz = iz; }
-    if (ff != kFF) { _encPID.setFF(ff); kFF    = ff; }
+    if (p != kP)   { _pidEnc.setP(p); kP       = p; }
+    if (i != kI)   { _pidEnc.setI(i); kI       = i; }
+    if (d != kD)   { _pidEnc.setD(d); kD       = d; }
+    if (iz != kIz) { _pidEnc.setIZone(iz); kIz = iz; }
+    if (ff != kFF) { _pidEnc.setFF(ff); kFF    = ff; }
     
     if ((max != kMaxOutput) || (min != kMinOutput)) { 
-      _encPID.setOutputRange(min, max); 
+      _pidEnc.setOutputRange(min, max); 
       kMinOutput = min; 
       kMaxOutput = max;
     }
 
-    _encPID.setReference(rot, CANSparkMax.ControlType.kPosition);
 
   }
 
   // ATIVA O SHOOTER
   public void setActivate(double rpm){
 
-    ct_right.set(ControlMode.PercentOutput, rpm / RPM);
-//*/
+    //ct_right.set(rpm / RPM);
+    _pidEnc.setReference(rpm, CANSparkMax.ControlType.kVelocity);
+    //*/
 }
 
   // YAW
@@ -199,7 +204,7 @@ public class Shooter extends SubsystemBase {
 ///*
   public void chute(boolean pitchDualMove) {
     limelightPitchControl(pitchDualMove);
-    setActivate(3400);
+    setActivate(16800);
   }
 
 //*/
@@ -258,6 +263,10 @@ public class Shooter extends SubsystemBase {
 
   }
 
+  public void disableLed (boolean mode) {
+    table.getEntry("ledMode").setNumber(mode ? 1:3);
+  }
+
   
   //CALCULA DISTANCIA ENTRE O ROBO E O HUB
 /*  public double distRoboHub(){
@@ -270,7 +279,7 @@ public class Shooter extends SubsystemBase {
   @Override
   public void periodic() {
     // ATUALIZA CORREÇAO DO ENCODER DO SHOOTER
-    //encoderCorrection();
+    encoderCorrection();
 
     SmartDashboard.putNumber("Servo 0", at_pitchR.get());
     SmartDashboard.putNumber("Servo 1", at_pitchL.get());

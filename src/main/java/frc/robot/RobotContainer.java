@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.robot.commands.Autonomo;
+import frc.robot.subsystems.Camera;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Collector;
 import frc.robot.subsystems.Drivetrain;
@@ -33,6 +34,7 @@ public class RobotContainer {
   Shooter sb_shooter;
   Tests sb_test;
   Drive sb_Drive;
+  Camera sb_Camera;
 
   // COMANDO COM PADRAO C_ NA FRENTE
   Timer t_tPitch, t_tStor;
@@ -51,13 +53,14 @@ public class RobotContainer {
     coPilot = new XboxController(Constants.Control_map.CO_PILOT);
 
     // DEFININDO SUBSISTEMAS NO CONTAINER
-    //sb_shot  = new Shooter();
+    sb_shooter  = new Shooter();
     sb_storge     = new Storage();
-    sb_collector  = new Collector();
-    //sb_test   	  = new Tests();
-    //sb_drive  	  = new Drivetrain();
-    //sb_climber  	  = new Climber();
-    //sb_Drive      = new Drive();
+    sb_collector = new Collector();
+    //sb_test    = new Tests();
+    sb_drive   = new Drivetrain();
+    //sb_climber = new Climber();
+    //sb_Drive   = new Drive();
+    sb_Camera  = new Camera();
 
     // DEFININDO SENSORES, ETC
     t_tStor  = new Timer();
@@ -74,12 +77,14 @@ public class RobotContainer {
 
   private void configureButtonBindings() {
 
+      sb_shooter.disableLed(false);
+
     //#region DRIVETRAIN
     try {
 
       sb_drive.setDefaultCommand(new RunCommand(() -> {
 
-        sb_drive.direction(-pilot.getLeftY(), pilot.getRightX());
+        sb_drive.direction(pilot.getRightX(), -pilot.getLeftY());
 
       }, sb_drive));
 
@@ -103,8 +108,14 @@ public class RobotContainer {
        //*/
 
         // COLLECTOR
-        if      (pilot.getRightTriggerAxis() > 0) sb_collector.collect(0.5);
+        /*if      (pilot.getRightTriggerAxis() > 0) sb_collector.collect(0.7);
         else if (pilot.getLeftTriggerAxis()  > 0) sb_collector.collect(-0.5);
+        else if (coPilot.getRightBumper()) sb_collector.collect(-0.5);
+        else sb_collector.collect(0.0);
+        //*/
+
+        if      (pilot.getAButton()) sb_collector.collect(-0.7);
+        else if (pilot.getBButton()) sb_collector.collect(0.5);
         else if (coPilot.getRightBumper()) sb_collector.collect(-0.5);
         else sb_collector.collect(0.0);
       
@@ -130,9 +141,9 @@ public class RobotContainer {
 
       // SHOOTER
       //sb_shoter.setActivate(coPilot.getAButton());
-      //sb_shoter.servoMov(coPilot.getLeftTriggerAxis()); 
+      //sb_shoter.servoMov(coPilot.getLeftTriggerAxis());
 
-      if (coPilot.getLeftTriggerAxis() > 0) {
+      if (pilot.getLeftTriggerAxis() > 0) { //ALTERA PRA COPILOTO DEPOIS SFD
 
         if (reset) {
 
@@ -197,12 +208,27 @@ public class RobotContainer {
     sb_storge.setDefaultCommand(new RunCommand(() -> {
       
       // STORAGE
-      if      (pilot.getRightTriggerAxis() > 0) sb_storge.setFeeder(0.75);
-      else if (pilot.getLeftTriggerAxis() > 0) sb_storge.setFeeder(-0.75);
+      /*if      (pilot.getRightTriggerAxis() > 0) sb_storge.setFeeder(0.75);
+      else if (pilot.getLeftTriggerAxis() > 0)  sb_storge.setFeeder(-0.75);
       else sb_storge.setFeeder(0);
 
       if      (coPilot.getRightTriggerAxis() > 0) sb_storge.setConveyor(0.75);
       else if (coPilot.getRightBumper()) sb_storge.setConveyor(-0.75);
+      else sb_storge.setFeeder(0);
+      //*/
+
+      if(pilot.getRightTriggerAxis() > 0) {
+        sb_storge.setFeeder(0.8);
+        sb_storge.setConveyor(-0.8);
+      }
+      else if (pilot.getAButton()) {
+        sb_storge.setFeeder(0.8);
+        sb_storge.setConveyor(-0.8);
+      }
+      else if (pilot.getBButton()) {
+        sb_storge.setFeeder(-0.8);
+        sb_storge.setConveyor(-0.8);
+      }
       else sb_storge.setFeeder(0);
 
     }, sb_storge));
@@ -216,7 +242,7 @@ public class RobotContainer {
     //#endregion
 
     //#region TESTES
-
+  /*
     try {
 
       sb_test.setDefaultCommand(new RunCommand(() -> {
@@ -243,11 +269,8 @@ public class RobotContainer {
 
         if (coPilot.getBackButton()) {
 
-          if      (coPilot.getAButton()) sb_climber.climberSolenoidET1(true);
-          else if (coPilot.getXButton()) sb_climber.climberSolenoidET2(true);
-          else if (coPilot.getYButton()) sb_climber.climbing(0.5);
-          else sb_climber.climbing(0);
-
+          if   (coPilot.getXButton()) sb_climber.climber(true);
+          else sb_climber.climber(false);
         }
 
 
@@ -260,7 +283,11 @@ public class RobotContainer {
     }
 
     //#endregion
-   
+
+  }
+
+  public void disableLed () {
+    sb_shooter.disableLed(true);
   }
 
   // COMANDO AUTONOMO

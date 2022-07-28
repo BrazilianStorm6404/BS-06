@@ -18,20 +18,18 @@ public class Collector extends SubsystemBase {
  
   // CRIACAO DA VARIAVEL
   private VictorSPX ct_coll;
-  private WPI_TalonSRX at_sold;
+  private VictorSPX at_sold;
 
   public Collector() {
 
     // INICIALIZACAO DO COLETOR
     try {
       ct_coll = new VictorSPX(Constants.Motors.Collector.COLLECTOR);
-      at_sold = new WPI_TalonSRX(Constants.Soleinoid.COLETOR);
+      at_sold = new VictorSPX(Constants.Soleinoid.COLETOR);
 
     } catch (Exception ex) {
       System.out.println("Erro na busca de controlador");
-
     }
-
   }
 
   // FUNCAO DO SISTEMA DE COLETOR
@@ -42,7 +40,7 @@ public class Collector extends SubsystemBase {
   // CONTROLE SOLENOID
   public void collectorSolenoid (boolean sol){
     
-    at_sold.set(sol ? 1 : 0);
+    at_sold.set(ControlMode.PercentOutput, sol ? 1 : 0);
 
   }
 

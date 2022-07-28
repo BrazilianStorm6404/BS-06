@@ -1,10 +1,15 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.RemoteSensorSource;
+import com.ctre.phoenix.motorcontrol.SensorTerm;
 // IMPORTS
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import com.kauailabs.navx.frc.AHRS;
+
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.SPI.Port;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -19,7 +24,7 @@ public class Drivetrain extends SubsystemBase {
   //#region CRIACAO DAS VARIAVEIS
 
   // GIROSCÓPIO
-  private ADXRS450_Gyro sn_gyro;
+  private AHRS sn_gyro;
 
   // METODO DE CONTAGEM CONTINUA
   private double d = 0, e = 0;
@@ -69,7 +74,7 @@ public class Drivetrain extends SubsystemBase {
     _drive = new DifferentialDrive(left, right);
     
     // CONFIGURAÇAO GYRO
-    sn_gyro = new ADXRS450_Gyro(Port.kOnboardCS0);
+    sn_gyro = new AHRS(Port.kOnboardCS0);
     sn_gyro.calibrate();
 
     // PARAMETROS PID
@@ -77,10 +82,25 @@ public class Drivetrain extends SubsystemBase {
     _autEncPID.setPID(0.001, 0, 0);
     
     // CONFIGURAÇAO DOS ENCODERS
-    ct_lFront.configFactoryDefault();
-    ct_rFront.configFactoryDefault();
-    //ct_lFront.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 30);
-    //ct_rFront.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 30);
+    ct_lBack.configFactoryDefault();
+    ct_rBack.configFactoryDefault();
+
+    ct_rBack.setNeutralMode(NeutralMode.Brake);
+    ct_lBack.setNeutralMode(NeutralMode.Brake);
+
+    ct_lBack.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
+
+    ct_lBack.setSensorPhase(true);
+
+    ct_rBack.configRemoteFeedbackFilter(ct_lBack.getDeviceID(), RemoteSensorSource.TalonSRX_SelectedSensor, 0);
+
+    ct_rBack.configSensorTerm(SensorTerm.Sum0, FeedbackDevice.RemoteSensor0);
+    ct_rBack.configSensorTerm(SensorTerm.Sum1, FeedbackDevice.CTRE_MagEncoder_Relative);
+
+    ct_rBack.configSelectedFeedbackSensor(FeedbackDevice.SensorSum);
+    ct_rBack.configSelectedFeedbackCoefficient(0.5);
+
+    ct_rBack.setSelectedSensorPosition(0);
 
     t_moveTime = new Timer();
     t_moveTime.start();
@@ -90,8 +110,8 @@ public class Drivetrain extends SubsystemBase {
   }
 
   // FUNCAO DO SISTEMA DE TRACAO (EIXO Y, EIXO X)
-  public void direction(double Y, double X) {
-    _drive.arcadeDrive(Y, X);
+  public void direction(double X, double Y) {
+    _drive.arcadeDrive(X, Y);
   }
 
   // RETORNA ANGULO DO GYRO
@@ -112,7 +132,6 @@ public class Drivetrain extends SubsystemBase {
   public void distancia (double vel, double dir, double dist) {
 
     // RESET ENCODERS
-    //_lFront.setSelectedSensorPosition(0);
     //_rFront.setSelectedSensorPosition(0);
 
     t_moveTime.reset();
@@ -123,38 +142,13 @@ public class Drivetrain extends SubsystemBase {
     
   }
 
-  // CONVERTE VALOR PERIODICO DOS ENCODERS PARA CONTINUO
-  public double vc (char lado) {
-
-    if (3000 < Math.abs(d - ct_rFront.getSelectedSensorPosition(1))){
-
-      if (d > ct_rFront.getSelectedSensorPosition(1)) revD ++;
-      else revD --;
-
-    }
-
-    if (3000 < Math.abs(e - ct_lFront.getSelectedSensorPosition(0))){
-
-      if (e > ct_lFront.getSelectedSensorPosition(0)) revE ++;
-      else revE --;
-
-    }
-
-    e = ct_lFront.getSelectedSensorPosition(0);
-    d = ct_rFront.getSelectedSensorPosition(1);
-
-    if (lado == 'd') return revD * 4094  + d;
-    else return revE * 4094  + e;
-
-  }
-
   // PERIODICA
   @Override
   public void periodic() {
 
     SmartDashboard.putNumber("gyro", sn_gyro.getAngle());
     corrct    = _autDirPID.calculate(t_moveTime.get());//_gyro.getAngle());
-    corrctVel = _autEncPID.calculate((vc('e') + vc('d')) / 2);
+    corrctVel = _autEncPID.calculate(ct_rBack.getSelectedSensorPosition());
 
   }
 }

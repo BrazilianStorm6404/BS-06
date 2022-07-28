@@ -4,7 +4,6 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
@@ -18,7 +17,7 @@ public class Storage extends SubsystemBase {
 
   // CRIANDO OS CONTROLADORES DO SISTEMA DE ARAMAZENADOR
   private VictorSPX ct_feeder;
-  private CANSparkMax ct_conveyor;
+  private VictorSPX ct_conveyor;
 
   // CRIANDO OS SENSORES DO SISTEMA DE ARMAZENADOR
   private DigitalInput sn_photS;
@@ -29,7 +28,7 @@ public class Storage extends SubsystemBase {
     try {
 
       ct_feeder   = new VictorSPX(Constants.Motors.Storage.FEEDER);
-      ct_conveyor = new CANSparkMax(Constants.Motors.Storage.CONVEYOR, MotorType.kBrushed);
+      ct_conveyor = new VictorSPX(Constants.Motors.Storage.CONVEYOR);
 
     } catch (Exception ex) {
 
@@ -47,7 +46,7 @@ public class Storage extends SubsystemBase {
   }
 
   public void setConveyor(double vel) {
-    ct_conveyor.set(vel);
+    ct_conveyor.set(VictorSPXControlMode.PercentOutput, vel);
   }
 
   // CRIANDO FUNCAO DOS SENSORES
