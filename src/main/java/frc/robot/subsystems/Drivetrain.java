@@ -63,7 +63,6 @@ public class Drivetrain extends SubsystemBase {
       ct_rBack  = new WPI_TalonSRX (Constants.Motors.Drivetrain.RIGHT_BACK);
     } catch (Exception ex) {
       System.out.println("Erro na busca de controlador");
-
     }
     
     // DEFININDO OS AGRUPAMENTO DOS CONTROLADORES
@@ -74,34 +73,23 @@ public class Drivetrain extends SubsystemBase {
     _drive = new DifferentialDrive(left, right);
     
     // CONFIGURAÇAO GYRO
+    /*
     sn_gyro = new AHRS(Port.kOnboardCS0);
     sn_gyro.calibrate();
-
-    // PARAMETROS PID
-    _autDirPID.setPID(0.001, 0, 0);
-    _autEncPID.setPID(0.001, 0, 0);
-    
+*/
     // CONFIGURAÇAO DOS ENCODERS
     ct_lBack.configFactoryDefault();
     ct_rBack.configFactoryDefault();
-
-    ct_rBack.setNeutralMode(NeutralMode.Brake);
-    ct_lBack.setNeutralMode(NeutralMode.Brake);
-
+    
     ct_lBack.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
-
+    ct_rBack.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
+    
     ct_lBack.setSensorPhase(true);
-
-    ct_rBack.configRemoteFeedbackFilter(ct_lBack.getDeviceID(), RemoteSensorSource.TalonSRX_SelectedSensor, 0);
-
-    ct_rBack.configSensorTerm(SensorTerm.Sum0, FeedbackDevice.RemoteSensor0);
-    ct_rBack.configSensorTerm(SensorTerm.Sum1, FeedbackDevice.CTRE_MagEncoder_Relative);
-
-    ct_rBack.configSelectedFeedbackSensor(FeedbackDevice.SensorSum);
-    ct_rBack.configSelectedFeedbackCoefficient(0.5);
-
+    ct_rBack.setSensorPhase(false);
+    
     ct_rBack.setSelectedSensorPosition(0);
-
+    ct_lBack.setSelectedSensorPosition(0);
+    
     t_moveTime = new Timer();
     t_moveTime.start();
 
@@ -140,15 +128,15 @@ public class Drivetrain extends SubsystemBase {
 
     move(corrctVel * vel, dir);
     
-  }
+  }//*/
 
   // PERIODICA
   @Override
   public void periodic() {
 
-    SmartDashboard.putNumber("gyro", sn_gyro.getAngle());
-    corrct    = _autDirPID.calculate(t_moveTime.get());//_gyro.getAngle());
-    corrctVel = _autEncPID.calculate(ct_rBack.getSelectedSensorPosition());
+    //SmartDashboard.putNumber("gyro", sn_gyro.getAngle());
+    //corrct    = _autDirPID.calculate(t_moveTime.get());//_gyro.getAngle());
+    //corrctVel = _autEncPID.calculate(ct_rBack.getSelectedSensorPosition());
 
   }
 }

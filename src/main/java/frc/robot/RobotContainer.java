@@ -77,8 +77,6 @@ public class RobotContainer {
 
   private void configureButtonBindings() {
 
-      sb_shooter.disableLed(false);
-
     //#region DRIVETRAIN
     try {
 
@@ -91,6 +89,7 @@ public class RobotContainer {
     } catch (Exception ex) {
 
       System.out.println("Erro ao executar funçoes da classe "+this.getClass());
+     
 
     }
     //*/
@@ -101,6 +100,8 @@ public class RobotContainer {
     try {
 
       sb_collector.setDefaultCommand(new RunCommand(() -> {
+
+      sb_shooter.disableLed(false);
 
         // CONTROLE SOLENOID
        /* if(co_pilot.getAButton()) sb_collector.collectorSolenoid(true);
@@ -126,10 +127,13 @@ public class RobotContainer {
       System.out.println("Erro ao executar funçoes da classe " + this.getClass());
       System.out.println("EEEEERRO: " + ex.getMessage());
 
-      return;
+    
 
     }
   //*/
+
+  
+
     
 
     //#endregion
@@ -139,9 +143,11 @@ public class RobotContainer {
     
       sb_shooter.setDefaultCommand(new RunCommand(() -> {
 
+        
       // SHOOTER
       //sb_shoter.setActivate(coPilot.getAButton());
       //sb_shoter.servoMov(coPilot.getLeftTriggerAxis());
+
 
       if (pilot.getLeftTriggerAxis() > 0) { //ALTERA PRA COPILOTO DEPOIS SFD
 
@@ -185,7 +191,7 @@ public class RobotContainer {
         }
 
         SmartDashboard.putNumber("eeee", t_tPitch.get());
-        /*
+
       if (sb_shooter.isLimelightDetected()) sb_shooter.limelightYawControl(); // CONTROLE AUTOMATICO PITCH/YAW LIMELIGHT
       else sb_shooter.rotation(coPilot.getRightX());
       //*/
@@ -195,6 +201,7 @@ public class RobotContainer {
     } catch (Exception ex) {
 
       System.out.println("Erro ao executar funçoes da classe " + this.getClass());
+      
       
   }
         
@@ -218,19 +225,23 @@ public class RobotContainer {
       //*/
 
       if(pilot.getRightTriggerAxis() > 0) {
-        sb_storge.setFeeder(0.8);
-        sb_storge.setConveyor(-0.8);
+        sb_storge.setFeeder(-0.8);
+        sb_storge.setConveyor(1);
       }
       else if (pilot.getAButton()) {
+        sb_storge.setFeeder(-0.8);
+        sb_storge.setConveyor(-0.9);
+      }
+      else if (pilot.getBButton()) {
         sb_storge.setFeeder(0.8);
         sb_storge.setConveyor(-0.8);
       }
-      else if (pilot.getBButton()) {
-        sb_storge.setFeeder(-0.8);
-        sb_storge.setConveyor(-0.8);
-      }
-      else sb_storge.setFeeder(0);
+      else {
+        
+        sb_storge.setConveyor(0);
+        sb_storge.setFeeder(0);
 
+      }
     }, sb_storge));
 
     } catch (Exception ex) {

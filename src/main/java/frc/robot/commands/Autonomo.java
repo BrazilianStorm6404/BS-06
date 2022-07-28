@@ -50,7 +50,7 @@ public class Autonomo extends CommandBase {
   // COMANDO AUTONOMO
   @Override
   public void execute() {
-
+/*
     //Drive
     if (t_drive.get() < 1) {
       _drive.distancia(0.1, 0, 100); //distancia em cm

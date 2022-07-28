@@ -4,9 +4,6 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -33,6 +30,8 @@ public class Storage extends SubsystemBase {
     } catch (Exception ex) {
 
       System.out.println("Erro na busca de controlador: " + ex.getStackTrace()[0]);
+      return;
+
       
     }
 

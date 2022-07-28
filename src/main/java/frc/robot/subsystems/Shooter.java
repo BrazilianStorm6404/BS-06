@@ -1,10 +1,8 @@
 
 package frc.robot.subsystems;
 // IMPORTS
-import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
@@ -46,7 +44,7 @@ public class Shooter extends SubsystemBase {
   private NetworkTableEntry tx, tv, ty;
 
   // SHOOTER CONTROLE RPM
-  private double RPM;
+  private double RPM, kRPM;
 
   // PITCH
   private double minAngle, maxAngle, maxPos;
@@ -65,6 +63,7 @@ public class Shooter extends SubsystemBase {
 
     pitchPos = 0;
     RPM      = 21000;
+    kRPM     = 0;
 
     minAngle = 16;
     maxAngle = 40;
@@ -84,11 +83,15 @@ public class Shooter extends SubsystemBase {
 
     } catch (Exception ex) {
       System.out.println("Erro na busca de controlador, linha: " + ex.getStackTrace()[0]);
+      return;
     }
 
-    ct_right.setInverted(false);
+    ct_right.restoreFactoryDefaults();
+    ct_left.restoreFactoryDefaults();
+
+    ct_right.setInverted(true);
     ct_left.setInverted(false);
-    ct_left.follow(ct_right);
+    ct_right.follow(ct_left);
 
     //*/
     at_pitchR = new Servo(Constants.Motors.Shooter.PITCH_RIGHT);
@@ -110,8 +113,12 @@ public class Shooter extends SubsystemBase {
     //#region ENCODER SHOOTER
 
     // DEFINE ENCODER SHOOTER
-    ct_right.restoreFactoryDefaults();
     sn_shotEnc = ct_right.getEncoder(Type.kQuadrature, 4096);
+
+    sn_shotEnc.setInverted(true);
+
+    sn_shotEnc.setPosition(0.0);
+
 
     //#region PID DE CORREÇAO DO VALOR DO ENCODER
     _pidEnc = ct_right.getPIDController();
@@ -134,14 +141,14 @@ public class Shooter extends SubsystemBase {
     _pidEnc.setFF(kFF);
     _pidEnc.setOutputRange(kMinOutput, kMaxOutput);
 
+
     sn_shotEnc.setVelocityConversionFactor(RPM);
 
     encoderCorrection ();
 
-    _pidEnc.setReference(0, CANSparkMax.ControlType.kVelocity);
+    _pidEnc.setReference(kRPM, CANSparkMax.ControlType.kVelocity);
 
     // RESET ENCODER
-    sn_shotEnc.setPosition(0.0);
     //*/
     //#endregion
   
@@ -170,14 +177,17 @@ public class Shooter extends SubsystemBase {
       kMaxOutput = max;
     }
 
+    _pidEnc.setReference(kRPM, CANSparkMax.ControlType.kVelocity);
+
 
   }
 
   // ATIVA O SHOOTER
   public void setActivate(double rpm){
 
-    //ct_right.set(rpm / RPM);
-    _pidEnc.setReference(rpm, CANSparkMax.ControlType.kVelocity);
+    ct_left.set(rpm / RPM);
+    kRPM  = rpm;
+    //_pidEnc.setReference(rpm, CANSparkMax.ControlType.kVelocity);
     //*/
 }
 
@@ -204,7 +214,7 @@ public class Shooter extends SubsystemBase {
 ///*
   public void chute(boolean pitchDualMove) {
     limelightPitchControl(pitchDualMove);
-    setActivate(16800);
+    setActivate(-16800);
   }
 
 //*/
@@ -264,7 +274,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public void disableLed (boolean mode) {
-    table.getEntry("ledMode").setNumber(mode ? 1:3);
+    table.getEntry("ledMode").setNumber(mode ? 1.0 : 3.0);
   }
 
   

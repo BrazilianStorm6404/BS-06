@@ -4,11 +4,6 @@ package frc.robot.subsystems;
 // IMPORTS
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.PIDSubsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -29,6 +24,8 @@ public class Collector extends SubsystemBase {
 
     } catch (Exception ex) {
       System.out.println("Erro na busca de controlador");
+      return;
+
     }
   }
 
