@@ -57,7 +57,7 @@ public class RobotContainer {
     sb_storge     = new Storage();
     sb_collector = new Collector();
     //sb_test    = new Tests();
-    sb_drive   = new Drivetrain();
+    //sb_drive   = new Drivetrain();
     //sb_climber = new Climber();
     //sb_Drive   = new Drive();
     sb_Camera  = new Camera();
@@ -192,6 +192,7 @@ public class RobotContainer {
 
         SmartDashboard.putNumber("eeee", t_tPitch.get());
 
+        //sb_shooter.rotation(coPilot.getRightX());
       if (sb_shooter.isLimelightDetected()) sb_shooter.limelightYawControl(); // CONTROLE AUTOMATICO PITCH/YAW LIMELIGHT
       else sb_shooter.rotation(coPilot.getRightX());
       //*/

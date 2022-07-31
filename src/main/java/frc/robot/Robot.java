@@ -22,7 +22,7 @@ public class Robot extends TimedRobot {
     } catch (Exception ex) {
 
       System.out.println("Erro em "+this.getClass()+": Erro ao iniciar");
-      return;
+      
       
     }
   }
@@ -38,7 +38,7 @@ public class Robot extends TimedRobot {
       _robotContainer.disableLed();
     } catch (Exception ex) {
       System.out.println("Erro em "+this.getClass()+": Erro ao iniciar" );
-      return;
+      
     }
   }
 
@@ -54,7 +54,7 @@ public class Robot extends TimedRobot {
     }
     } catch (Exception ex) {
       System.out.println("Erro em "+this.getClass()+": Erro ao executar código autônomo");
-      return;
+      
     }
   }
 
@@ -71,7 +71,7 @@ public class Robot extends TimedRobot {
 
     } catch (Exception ex) {
       System.out.println("Erro em "+this.getClass()+": Erro ao executar código tele-operado");
-      return;
+      
     }
     
   }
