@@ -29,7 +29,7 @@ public class Camera extends SubsystemBase {
       
       } catch (Exception ex){
 
-        System.out.println("Erro na busca de camera");
+        System.out.println("\n\nERRO NA BUSCA DE CAMERA, LINHA: " + ex.getStackTrace()[0] + "\n\n");
         return;
 
       }

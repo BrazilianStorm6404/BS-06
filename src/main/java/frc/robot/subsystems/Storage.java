@@ -29,7 +29,7 @@ public class Storage extends SubsystemBase {
 
     } catch (Exception ex) {
 
-      System.out.println("Erro na busca de controlador: " + ex.getStackTrace()[0]);
+      System.out.printf("\n\nERRO NA BUSCA DE CONTROLADOR, LINHA: %s\n\n", ex.getStackTrace()[0]);
       return;
 
       

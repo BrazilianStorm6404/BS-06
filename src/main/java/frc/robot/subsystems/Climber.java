@@ -25,9 +25,8 @@ public class Climber extends SubsystemBase {
 
     } catch (Exception ex) {
       
-      System.out.println("Erro na busca de controlador");
+      System.out.printf("\n\nERRO NA BUSCA DE CONTROLADOR, LINHA: %s\n\n", ex.getStackTrace()[0]);
       return;
-
 
     }
   }

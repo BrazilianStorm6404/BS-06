@@ -3,7 +3,6 @@ package frc.robot.subsystems;
 // IMPORTS
 import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
-
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
@@ -23,6 +22,7 @@ import frc.robot.Constants;
 public class Shooter extends SubsystemBase {
 
   // #region CRIAÇAO DAS VARIAVEIS
+
   // CRIANDO OS CONTROLADORES DO SISTEMA DE SHOOTER, PITCH E YAW
   private CANSparkMax ct_right, ct_left;
   private VictorSPX ct_yaw;
@@ -49,17 +49,14 @@ public class Shooter extends SubsystemBase {
   // PITCH
   private double minAngle, maxAngle, maxPos;
 
-  //CALCULO DE DISTANCIA
-  private double valConvr, catHub;
-
-
-  Timer t_time;
+  private Timer t_time;
 
   //#endregion
 
+
   public Shooter() {
 
-    SmartDashboard.putNumber("LL Angle", 0.0);
+    //SmartDashboard.putNumber("LL Angle", 0.0);
 
     pitchPos = 0;
     RPM      = 21000;
@@ -69,38 +66,35 @@ public class Shooter extends SubsystemBase {
     maxAngle = 40;
     maxPos   = .5;
 
-    valConvr = 215.0;
-    catHub   = Math.pow(238.0, 2);
-
-    //#region INICIALIZAÇAO DOS SISTEMAS
-
-    //#region DEFININDO OS CONTROLADORES DO SISTEMA DE SHOOTER, PITCH E YAW
-    try {
-
-      ct_yaw   = new VictorSPX(Constants.Motors.Shooter.YAW);
-      ct_left  = new CANSparkMax(Constants.Motors.Shooter.LEFT, MotorType.kBrushed);
-      ct_right = new CANSparkMax (Constants.Motors.Shooter.RIGHT, MotorType.kBrushed);
-
-    } catch (Exception ex) {
-      System.out.println("Erro na busca de controlador, linha: " + ex.getStackTrace()[0]);
-      return;
-    }
-
-    ct_right.restoreFactoryDefaults();
-    ct_left.restoreFactoryDefaults();
-
-    ct_right.setInverted(true);
-    ct_left.setInverted(false);
-    ct_right.follow(ct_left);
-
-    //*/
-    at_pitchR = new Servo(Constants.Motors.Shooter.PITCH_RIGHT);
-    at_pitchL = new Servo(Constants.Motors.Shooter.PITCH_LEFT);
-    //#endregion
-    
-    //#region DEFININDO OS SENSORES DO SISTEMA DE PITCH E YAW
     sn_limitLeft  = new DigitalInput(Constants.Sensors.LIMIT_LEFT);
     sn_limitRight = new DigitalInput(Constants.Sensors.LIMIT_RIGHT);
+
+    //#region DEFININDO OS CONTROLADORES DO SISTEMA DE SHOOTER, PITCH E YAW
+
+      try {
+
+        ct_yaw   = new VictorSPX(Constants.Motors.Shooter.YAW);
+        ct_left  = new CANSparkMax(Constants.Motors.Shooter.LEFT, MotorType.kBrushed);
+        ct_right = new CANSparkMax (Constants.Motors.Shooter.RIGHT, MotorType.kBrushed);
+
+      } catch (Exception ex) {
+
+        System.out.printf("\n\nERRO NA BUSCA DE CONTROLADOR, LINHA: %s\n\n", ex.getStackTrace()[0]);
+        return;
+
+      }
+
+      ct_right.restoreFactoryDefaults();
+      ct_left.restoreFactoryDefaults();
+
+      ct_right.setInverted(true);
+      ct_left.setInverted(false);
+      ct_right.follow(ct_left);
+
+      //*/
+      at_pitchR = new Servo(Constants.Motors.Shooter.PITCH_RIGHT);
+      at_pitchL = new Servo(Constants.Motors.Shooter.PITCH_LEFT);
+    
     //#endregion
 
     //#region TABELA DE VALORES LIMELIGHT
@@ -112,47 +106,50 @@ public class Shooter extends SubsystemBase {
 
     //#region ENCODER SHOOTER
 
-    // DEFINE ENCODER SHOOTER
-    sn_shotEnc = ct_right.getEncoder(Type.kQuadrature, 4096);
+      // DEFINE ENCODER SHOOTER
+      sn_shotEnc = ct_right.getEncoder(Type.kQuadrature, 4096);
 
-    sn_shotEnc.setInverted(true);
+      sn_shotEnc.setInverted(true);
 
-    sn_shotEnc.setPosition(0.0);
-
+      sn_shotEnc.setPosition(0.0);
+    
+    //#endregion
 
     //#region PID DE CORREÇAO DO VALOR DO ENCODER
-    _pidEnc = ct_right.getPIDController();
-    _pidEnc.setFeedbackDevice(sn_shotEnc);
 
-    // PID COEFICIENTES
-    kP         = 0.1; 
-    kI         = 1e-4;
-    kD         = 1; 
-    kIz        = 0; 
-    kFF        = 0; 
-    kMaxOutput = 1; 
-    kMinOutput = -1;
+      _pidEnc = ct_right.getPIDController();
+      _pidEnc.setFeedbackDevice(sn_shotEnc);
 
-    // DEFINE PID COEFICIENTES
-    _pidEnc.setP(kP);
-    _pidEnc.setI(kI);
-    _pidEnc.setD(kD);
-    _pidEnc.setIZone(kIz);
-    _pidEnc.setFF(kFF);
-    _pidEnc.setOutputRange(kMinOutput, kMaxOutput);
+      // PID COEFICIENTES
+      kP         = 0.1; 
+      kI         = 1e-4;
+      kD         = 1; 
+      kIz        = 0; 
+      kFF        = 0; 
+      kMaxOutput = 1; 
+      kMinOutput = -1;
+
+      // DEFINE PID COEFICIENTES
+      _pidEnc.setP(kP);
+      _pidEnc.setI(kI);
+      _pidEnc.setD(kD);
+      _pidEnc.setIZone(kIz);
+      _pidEnc.setFF(kFF);
+      _pidEnc.setOutputRange(kMinOutput, kMaxOutput);
 
 
-    sn_shotEnc.setVelocityConversionFactor(RPM);
+      sn_shotEnc.setVelocityConversionFactor(RPM);
 
-    encoderCorrection ();
+      encoderCorrection ();
 
-    _pidEnc.setReference(kRPM, CANSparkMax.ControlType.kVelocity);
-
-    // RESET ENCODER
+      _pidEnc.setReference(kRPM, CANSparkMax.ControlType.kVelocity);
     //*/
+    
     //#endregion
+          
   
   }
+
 
   // CALCULA CORRECAO ENCODER
   public void encoderCorrection (){
@@ -182,112 +179,124 @@ public class Shooter extends SubsystemBase {
 
   }
 
-  // ATIVA O SHOOTER
-  public void setActivate(double rpm){
-
-    ct_left.set(rpm / RPM);
-    kRPM  = rpm;
-    //_pidEnc.setReference(rpm, CANSparkMax.ControlType.kVelocity);
-    //*/
-}
-
-  // YAW
-  public void rotation(double y) {
-      ct_yaw.set(VictorSPXControlMode.PercentOutput, y);
-  
-  //*/
-}
-
-  // RETORNA INDENTIFICAÇAO
-  public boolean isLimelightDetected() {
-
-    return tv.getDouble(0.0) == 1.0 ? true : false;
-  
-  }
-
-  // ATIVA CONTROLE DA LIMELIGHT NO YAW
-  public void limelightYawControl(){
-
-    ct_yaw.set(VictorSPXControlMode.PercentOutput, tx.getDouble(0) * 0.1);
-
-  }
-///*
   public void chute(boolean pitchDualMove) {
+
     limelightPitchControl(pitchDualMove);
     setActivate(-16800);
-  }
+  
+    }
 
-//*/
-  // ATIVA CONTROLE DA LIMELIGHT NO PITCH
-  public void limelightPitchControl(boolean dual) {
+  //#region MANUAL CONTROL
 
-    // Relaçao proporcional (linha direta)
-    pitchPos = minAngle;//_ty.getDouble(_maxPosition);//SmartDashboard.getNumber("LL Angle", 16.0);
-    pitchPos = pitchPos - maxAngle;
-    pitchPos = pitchPos / ((minAngle - maxAngle) / maxPos);
+    // ATIVA O SHOOTER
+    public void setActivate(double rpm){
 
-    /*
-    // Relaçao exponencial (linha curva)
-    _pitchPos = _ty.getDouble(0.0) + 15;
-    _pitchPos = _pitchPos - _maxAngle;
-    _pitchPos = Math.pow(_pitchPos / (_minAngle - _maxAngle), 2);
-    _pitchPos = _pitchPos * _maxPosition;
+      ct_left.set(rpm / RPM);
+      kRPM  = rpm;
+      //_pidEnc.setReference(rpm, CANSparkMax.ControlType.kVelocity);
+      //*/
+    }
+
+    // YAW
+    public void rotation(double y) {
+
+      if (sn_limitRight.get() && y > 0) { 
+
+        ct_yaw.set(VictorSPXControlMode.PercentOutput, 0);
+
+      } else if (sn_limitLeft.get() && y < 0) { 
+
+        ct_yaw.set(VictorSPXControlMode.PercentOutput, 0);
+      
+      } else ct_yaw.set(VictorSPXControlMode.PercentOutput, y);
+
     //*/
+    }
 
+    // PITCH
+    public void servoMov (double p) {
 
-    if (pitchPos > maxPos) pitchPos = maxPos;
-    else if (pitchPos < 0) pitchPos = 0;
+        at_pitchR.set((-p + 1.0) * maxPos);
+        at_pitchL.set(p * maxPos);
+    
+    }
 
-    //SmartDashboard.putNumber("pitchPos", _pitchPos);
+    public void resetPitch () {
 
-    if (dual) {
-
-    at_pitchL.set(pitchPos);
+      at_pitchL.set(0);
+      at_pitchR.set(maxPos);
 
     }
 
-    at_pitchR.set(-pitchPos + 0.5);
+    public void servoDisable () {
 
+      at_pitchR.setDisabled();
+      at_pitchL.setDisabled();
 
-  }
-
-  // PITCH
-  public void servoMov (double p) {
-
-    at_pitchR.set((-p + 1.0) * maxPos);
-    at_pitchL.set(p * maxPos);
-
-  }
-
-  public void resetPitch () {
-
-    at_pitchL.set(0);
-    at_pitchR.set(maxPos);
-    
-  }
-
-  public void servoDisable () {
-
-    at_pitchR.setDisabled();
-    at_pitchL.setDisabled();
-
-  }
-
-  public void disableLed (boolean mode) {
-    table.getEntry("ledMode").setNumber(mode ? 1.0 : 3.0);
-  }
-
+    }
   
-  //CALCULA DISTANCIA ENTRE O ROBO E O HUB
-/*  public double distRoboHub(){
-    
-    return Math.sqrt(Math.pow(_valConvr / _ta.getDouble(0.0), 2) - _catHub); //catetoDistanciaRoboHub = raizQuadrada(hipotAtual - catetoDaAlturaDoHub)
+  //#endregion
   
-  }//*/
+  //#region LL CONTROLS
+
+    // RETORNA INDENTIFICAÇAO
+    public boolean isLimelightDetected() {
+
+      return tv.getDouble(0.0) == 1.0 ? true : false;
+  
+    }
+  
+    // ATIVA CONTROLE DA LIMELIGHT NO YAW
+    public void limelightYawControl(){
+
+      if (sn_limitRight.get() && tx.getDouble(0) > 0) {
+
+        ct_yaw.set(VictorSPXControlMode.PercentOutput, 0);
+
+      } else if (sn_limitLeft.get() && tx.getDouble(0) < 0) {
+
+        ct_yaw.set(VictorSPXControlMode.PercentOutput, 0);
+      
+      } else ct_yaw.set(VictorSPXControlMode.PercentOutput, tx.getDouble(0) * 0.1);
+
+
+    }
+  
+    // ATIVA CONTROLE DA LIMELIGHT NO PITCH
+    public void limelightPitchControl(boolean dual) {
+
+      // Relaçao proporcional (linha direta)
+      pitchPos = minAngle;//_ty.getDouble(_maxPosition);//SmartDashboard.getNumber("LL Angle", 16.0);
+      pitchPos = pitchPos - maxAngle;
+      pitchPos = pitchPos / ((minAngle - maxAngle) / maxPos);
+  
+      /*
+      // Relaçao exponencial (linha curva)
+      _pitchPos = _ty.getDouble(0.0) + 15;
+      _pitchPos = _pitchPos - _maxAngle;
+      _pitchPos = Math.pow(_pitchPos / (_minAngle - _maxAngle), 2);
+      _pitchPos = _pitchPos * _maxPosition;
+      //*/
+  
+  
+      if (pitchPos > maxPos) pitchPos = maxPos;
+      else if (pitchPos < 0) pitchPos = 0;
+  
+      //SmartDashboard.putNumber("pitchPos", _pitchPos);
+  
+      if (dual) at_pitchL.set(pitchPos);
+  
+      at_pitchR.set(-pitchPos + 0.5);
+  
+    }
+  
+  //#endregion
+
 
   // PERIODICA
   @Override
   public void periodic() {
+
     // ATUALIZA CORREÇAO DO ENCODER DO SHOOTER
     encoderCorrection();
 
@@ -295,4 +304,5 @@ public class Shooter extends SubsystemBase {
     SmartDashboard.putNumber("Servo 1", at_pitchL.get());
 
   }
+
 }
