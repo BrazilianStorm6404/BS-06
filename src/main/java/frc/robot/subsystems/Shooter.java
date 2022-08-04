@@ -71,25 +71,26 @@ public class Shooter extends SubsystemBase {
 
     //#region DEFININDO OS CONTROLADORES DO SISTEMA DE SHOOTER, PITCH E YAW
 
-      try {
+      //try {
 
         ct_yaw   = new VictorSPX(Constants.Motors.Shooter.YAW);
         ct_left  = new CANSparkMax(Constants.Motors.Shooter.LEFT, MotorType.kBrushed);
         ct_right = new CANSparkMax (Constants.Motors.Shooter.RIGHT, MotorType.kBrushed);
 
-      } catch (Exception ex) {
+      //} catch (Exception ex) {
 
-        System.out.printf("\n\nERRO NA BUSCA DE CONTROLADOR, LINHA: %s\n\n", ex.getStackTrace()[0]);
-        return;
+        //System.out.printf("\n\nERRO NA BUSCA DE CONTROLADOR, LINHA: %s\n\n", ex.getStackTrace()[0]);
+      
 
-      }
+      //}
 
       ct_right.restoreFactoryDefaults();
       ct_left.restoreFactoryDefaults();
 
       ct_right.setInverted(true);
       ct_left.setInverted(false);
-      ct_right.follow(ct_left);
+      //ct_right.follow(ct_left);
+      
 
       //*/
       at_pitchR = new Servo(Constants.Motors.Shooter.PITCH_RIGHT);
@@ -107,17 +108,19 @@ public class Shooter extends SubsystemBase {
     //#region ENCODER SHOOTER
 
       // DEFINE ENCODER SHOOTER
-      sn_shotEnc = ct_right.getEncoder(Type.kQuadrature, 4096);
+      sn_shotEnc = ct_left.getEncoder(Type.kQuadrature, 4096);
 
-      sn_shotEnc.setInverted(true);
+      sn_shotEnc.setInverted(false);
 
       sn_shotEnc.setPosition(0.0);
+
+      //sn_shotEnc.setVelocityConversionFactor(6000);
     
     //#endregion
 
     //#region PID DE CORREÇAO DO VALOR DO ENCODER
-
-      _pidEnc = ct_right.getPIDController();
+/*
+      _pidEnc = ct_left.getPIDController();
       _pidEnc.setFeedbackDevice(sn_shotEnc);
 
       // PID COEFICIENTES
@@ -137,12 +140,6 @@ public class Shooter extends SubsystemBase {
       _pidEnc.setFF(kFF);
       _pidEnc.setOutputRange(kMinOutput, kMaxOutput);
 
-
-      sn_shotEnc.setVelocityConversionFactor(RPM);
-
-      encoderCorrection ();
-
-      _pidEnc.setReference(kRPM, CANSparkMax.ControlType.kVelocity);
     //*/
     
     //#endregion
@@ -153,7 +150,7 @@ public class Shooter extends SubsystemBase {
 
   // CALCULA CORRECAO ENCODER
   public void encoderCorrection (){
-
+/*
     double p   = kP;
     double i   = kI;
     double d   = kD;
@@ -175,16 +172,17 @@ public class Shooter extends SubsystemBase {
     }
 
     _pidEnc.setReference(kRPM, CANSparkMax.ControlType.kVelocity);
-
+*/
 
   }
 
   public void chute(boolean pitchDualMove) {
 
     limelightPitchControl(pitchDualMove);
-    setActivate(-16800);
+    setActivate(10000);
   
     }
+
 
   //#region MANUAL CONTROL
 
@@ -192,14 +190,16 @@ public class Shooter extends SubsystemBase {
     public void setActivate(double rpm){
 
       ct_left.set(rpm / RPM);
-      kRPM  = rpm;
+      ct_right.set(ct_left.get());
+
+      //kRPM  = rpm;
       //_pidEnc.setReference(rpm, CANSparkMax.ControlType.kVelocity);
       //*/
     }
 
     // YAW
     public void rotation(double y) {
-
+      /*
       if (sn_limitRight.get() && y > 0) { 
 
         ct_yaw.set(VictorSPXControlMode.PercentOutput, 0);
@@ -209,6 +209,8 @@ public class Shooter extends SubsystemBase {
         ct_yaw.set(VictorSPXControlMode.PercentOutput, 0);
       
       } else ct_yaw.set(VictorSPXControlMode.PercentOutput, y);
+      //*/
+      ct_yaw.set(VictorSPXControlMode.PercentOutput, y);
 
     //*/
     }
@@ -228,10 +230,14 @@ public class Shooter extends SubsystemBase {
 
     }
 
-    public void servoDisable () {
+    public void servoDisable (boolean dual) {
 
-      at_pitchR.setDisabled();
-      at_pitchL.setDisabled();
+      if (dual){
+
+        at_pitchR.setDisabled();
+        at_pitchL.setDisabled();
+      
+      } else at_pitchL.setDisabled();
 
     }
   
@@ -248,7 +254,7 @@ public class Shooter extends SubsystemBase {
   
     // ATIVA CONTROLE DA LIMELIGHT NO YAW
     public void limelightYawControl(){
-
+/*
       if (sn_limitRight.get() && tx.getDouble(0) > 0) {
 
         ct_yaw.set(VictorSPXControlMode.PercentOutput, 0);
@@ -257,7 +263,9 @@ public class Shooter extends SubsystemBase {
 
         ct_yaw.set(VictorSPXControlMode.PercentOutput, 0);
       
-      } else ct_yaw.set(VictorSPXControlMode.PercentOutput, tx.getDouble(0) * 0.1);
+      } else ct_yaw.set(VictorSPXControlMode.PercentOutput, tx.getDouble(0) * 0.1);*/
+
+      ct_yaw.set(VictorSPXControlMode.PercentOutput, tx.getDouble(0) * 0.1);
 
 
     }
@@ -298,7 +306,9 @@ public class Shooter extends SubsystemBase {
   public void periodic() {
 
     // ATUALIZA CORREÇAO DO ENCODER DO SHOOTER
-    encoderCorrection();
+    //encoderCorrection();
+
+    SmartDashboard.putNumber("shooter v", sn_shotEnc.getVelocity());
 
     SmartDashboard.putNumber("Servo 0", at_pitchR.get());
     SmartDashboard.putNumber("Servo 1", at_pitchL.get());

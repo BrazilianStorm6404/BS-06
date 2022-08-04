@@ -24,7 +24,7 @@ public class Drivetrain extends SubsystemBase {
   //#region CRIACAO DAS VARIAVEIS
 
   // GIROSCÓPIO
-  private AHRS sn_gyro;
+  //private AHRS sn_gyro;
 
   // METODO DE CONTAGEM CONTINUA
   private double d = 0, e = 0;
@@ -47,10 +47,14 @@ public class Drivetrain extends SubsystemBase {
   private DifferentialDrive _drive;
 
   private Timer t_moveTime;
+  private boolean move;
 
   //#endregion
 
   public Drivetrain() {
+
+    // CONFIGURAÇAO GYRO
+    //sn_gyro = new AHRS(Port.kMXP);
 
     //#region INICIALIZACAO DO SISTEMA
 
@@ -76,12 +80,9 @@ public class Drivetrain extends SubsystemBase {
 
     // DEFININDO O DIFERENCIAL DO SISTEMA DE TRACAO
     _drive = new DifferentialDrive(left, right);
+
+    move = false;
     
-    // CONFIGURAÇAO GYRO
-    /*
-    sn_gyro = new AHRS(Port.kOnboardCS0);
-    sn_gyro.calibrate();
-*/
     // CONFIGURAÇAO DOS ENCODERS
     ct_lBack.configFactoryDefault();
     ct_rBack.configFactoryDefault();
@@ -95,8 +96,11 @@ public class Drivetrain extends SubsystemBase {
     ct_rBack.setSelectedSensorPosition(0);
     ct_lBack.setSelectedSensorPosition(0);
     
-    t_moveTime = new Timer();
-    t_moveTime.start();
+    _autEncPID = new PIDController(0.00001, 0.0, 0.0);
+
+    _autEncPID.setSetpoint(0);
+
+    _autEncPID.setTolerance(0.1);
 
     //#endregion
 
@@ -107,41 +111,43 @@ public class Drivetrain extends SubsystemBase {
     _drive.arcadeDrive(X, Y);
   }
 
-  // RETORNA ANGULO DO GYRO
-  public double gyroAngle () { 
-    return sn_gyro.getAngle();
-  }
-
-  // MOVE EM UMA DIREÇAO
-  public void move (double vel, double dir) {
-
-    angle += dir;
-    _autDirPID.setSetpoint(angle);
-    direction(vel, corrct);
-
-  }
-
   // MOVE UMA DISTANCIA EM UMA DIREÇAO
-  public void distancia (double vel, double dir, double dist) {
+  public boolean distancia (double v, double dist) {
 
     // RESET ENCODERS
-    //_rFront.setSelectedSensorPosition(0);
+    if (!move){
 
-    t_moveTime.reset();
+      ct_rBack.setSelectedSensorPosition(0);
+      ct_lBack.setSelectedSensorPosition(0);
+  
+      //t_moveTime.reset();
+  
+      _autEncPID.setSetpoint(dist * 8000);
 
-    _autEncPID.setSetpoint(dist / 80);// * 22);
+      move = true;
 
-    move(corrctVel * vel, dir);
+    }
+   
+    corrctVel = v * _autEncPID.calculate((ct_rBack.getSelectedSensorPosition() + ct_rBack.getSelectedSensorPosition()) / 2);
+    direction(0, corrctVel);
+
+    if (_autEncPID.atSetpoint()){
+
+      move = false;
+      return false;
+
+    } else return true;
+    
     
   }//*/
 
   // PERIODICA
   @Override
   public void periodic() {
-
-    //SmartDashboard.putNumber("gyro", sn_gyro.getAngle());
-    //corrct    = _autDirPID.calculate(t_moveTime.get());//_gyro.getAngle());
-    //corrctVel = _autEncPID.calculate(ct_rBack.getSelectedSensorPosition());
+    
+    SmartDashboard.putNumber("rBack", ct_rBack.getSelectedSensorPosition());
+    SmartDashboard.putNumber("lBack", ct_lBack.getSelectedSensorPosition());
+    SmartDashboard.putNumber("vel", corrctVel * 0.5);
 
   }
 }
