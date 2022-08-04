@@ -1,6 +1,8 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 // IMPORTS
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -22,10 +24,20 @@ public class Autonomo extends CommandBase {
   Timer t_drive;
   Timer t_sto;
   Timer t_sho;
+  boolean isFinished, et1, et2;
+
+  NetworkTable table;
 
   //#endregion
 
   public Autonomo(Drivetrain dr, Shooter sh, Storage st, Collector cl) {
+
+    table = NetworkTableInstance.getDefault().getTable("limelight");
+
+    table.getEntry("ledMode").setNumber(3);
+    table.getEntry("camMode").setNumber(1);
+    table.getEntry("pipeline").setNumber(2);
+
 
     addRequirements(dr);
     addRequirements(sh);
@@ -41,14 +53,18 @@ public class Autonomo extends CommandBase {
     t_sho   = new Timer();
     t_sto   = new Timer();
 
+    et1 = true;
+    et2 = true;
+
+    isFinished = false;
+  
+
   }
 
   @Override
   public void initialize() {
+    //t_drive.start();
 
-    t_drive.start();
-
-    sb_drive.distancia(0.5, -100);
     
   }
 
@@ -59,32 +75,93 @@ public class Autonomo extends CommandBase {
   @Override
   public void execute() {
 
-    sb_drive.correction();
+    if (!sb_drive.isMove() && et1) {
 
-/*
-    t_sho.start();
-    //Shooting
-    sb_shooter.chute(true);
+      sb_drive.distancia(0.5, -100);
 
-    pause(3);
+    } else {
 
-    sb_shooter.servoDisable(false);
-    sb_shooter.chute(false);
+      et1 = false;
+      t_drive.start();
 
-    sb_storage.setFeeder(-0.9);
-    sb_storage.setConveyor(0.9);
+    }
 
-    pause(3);
+    if (!et1 && t_drive.get() <= 2) {
 
-    sb_shooter.setActivate(0);
+      sb_shooter.chute(true);
 
-    sb_storage.setFeeder(0);
-    sb_storage.setConveyor(0);
+    } else if (!et1 && t_drive.get() <= 2.5) { 
 
-    sb_shooter.resetPitch();
-    pause(3);
-    sb_shooter.servoDisable(true);
-*/
+      sb_shooter.servoDisable(false);
+
+    } else if (!et1 && t_drive.get() <= 6) {
+      
+      sb_shooter.chute(false);
+
+      sb_storage.setFeeder(-0.9);
+      sb_storage.setConveyor(0.9);
+
+    } else if (!et1 && t_drive.get() > 6) {
+
+      sb_shooter.setActivate(0);
+
+      sb_storage.setFeeder(0);
+      sb_storage.setConveyor(0);
+
+
+      if (t_drive.get() >= 8) {
+
+        t_drive.stop();
+        sb_shooter.servoDisable(true);
+        isFinished = true;
+      }
+
+    } else sb_shooter.resetPitch();
+
+
+
+  /*
+      if (et1 && t_drive.get() <= 2) {
+  
+        sb_shooter.chute(true);
+  
+      } else if (et1 && t_drive.get() <= 2.5) { 
+  
+        sb_shooter.servoDisable(false);
+  
+      } else if (et1 && t_drive.get() <= 6) {
+        
+        sb_shooter.chute(false);
+  
+        sb_storage.setFeeder(-0.9);
+        sb_storage.setConveyor(0.9);
+  
+      } else if (et1 && t_drive.get() > 6) {
+  
+        sb_shooter.setActivate(0);
+  
+        sb_storage.setFeeder(0);
+        sb_storage.setConveyor(0);
+  
+  
+        if (t_drive.get() >= 8) {
+  
+          t_drive.stop();
+          sb_shooter.servoDisable(true);
+          et1 = false;
+  
+        } else sb_shooter.resetPitch();
+
+      }
+
+    if (!et1) {
+
+      sb_drive.distancia(0.5, -100);
+      isFinished = sb_drive.isMove();
+      
+    }
+
+    //*/
 
   }
 
@@ -94,6 +171,6 @@ public class Autonomo extends CommandBase {
 
   @Override
   public boolean isFinished() {
-    return false;
+    return isFinished;
   }
 }

@@ -17,6 +17,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
+
+    NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(3);
+
     try {
 
       _robotContainer = new RobotContainer();
@@ -46,6 +49,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
+
     try {
         cm_autonomousCommand = _robotContainer.getAutonomousCommand();
       if (cm_autonomousCommand != null) {

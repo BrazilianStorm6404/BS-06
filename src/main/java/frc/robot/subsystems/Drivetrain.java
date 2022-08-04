@@ -26,16 +26,9 @@ public class Drivetrain extends SubsystemBase {
   // GIROSCÓPIO
   //private AHRS sn_gyro;
 
-  // METODO DE CONTAGEM CONTINUA
-  private double d = 0, e = 0;
-  private int revD = 0, revE = 0;
-
-  // ANGULO DE ROTAÇAO
-  private double angle = 0;
-
   // CORRECAO DE PID
-  private double corrct, corrctVel; //Correçao de velocidade 
-  private PIDController _autDirPID, _autEncPID;
+  private double corrctVel; //Correçao de velocidade 
+  private PIDController _autEncPID;
 
   // CRIANDO OS CONTROLADORES DO SISTEMA DE TRACAO
   private WPI_TalonSRX ct_lFront, ct_lBack, ct_rFront, ct_rBack;
@@ -81,7 +74,6 @@ public class Drivetrain extends SubsystemBase {
     // DEFININDO O DIFERENCIAL DO SISTEMA DE TRACAO
     _drive = new DifferentialDrive(left, right);
 
-    move = false;
     
     // CONFIGURAÇAO DOS ENCODERS
     ct_lBack.configFactoryDefault();
@@ -96,11 +88,13 @@ public class Drivetrain extends SubsystemBase {
     ct_rBack.setSelectedSensorPosition(0);
     ct_lBack.setSelectedSensorPosition(0);
     
-    _autEncPID = new PIDController(0.00001, 0.0, 0.0);
+    _autEncPID = new PIDController(0.000013, 0.0, 0.0);
 
     _autEncPID.setSetpoint(0);
 
-    _autEncPID.setTolerance(0.1);
+    _autEncPID.setTolerance(1000);
+
+    move = false;
 
     //#endregion
 
@@ -112,7 +106,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   // MOVE UMA DISTANCIA EM UMA DIREÇAO
-  public boolean distancia (double v, double dist) {
+  public void distancia (double v, double dist) {
 
     // RESET ENCODERS
     if (!move){
@@ -122,7 +116,7 @@ public class Drivetrain extends SubsystemBase {
   
       //t_moveTime.reset();
   
-      _autEncPID.setSetpoint(dist * 8000);
+      _autEncPID.setSetpoint(dist * 170);
 
       move = true;
 
@@ -131,15 +125,12 @@ public class Drivetrain extends SubsystemBase {
     corrctVel = v * _autEncPID.calculate((ct_rBack.getSelectedSensorPosition() + ct_rBack.getSelectedSensorPosition()) / 2);
     direction(0, corrctVel);
 
-    if (_autEncPID.atSetpoint()){
-
-      move = false;
-      return false;
-
-    } else return true;
+    if (_autEncPID.atSetpoint()) move = false;
     
     
   }//*/
+
+  public boolean isMove(){ return _autEncPID.atSetpoint(); }
 
   // PERIODICA
   @Override
@@ -147,7 +138,7 @@ public class Drivetrain extends SubsystemBase {
     
     SmartDashboard.putNumber("rBack", ct_rBack.getSelectedSensorPosition());
     SmartDashboard.putNumber("lBack", ct_lBack.getSelectedSensorPosition());
-    SmartDashboard.putNumber("vel", corrctVel * 0.5);
+    SmartDashboard.putNumber("vel", corrctVel);
 
   }
 }

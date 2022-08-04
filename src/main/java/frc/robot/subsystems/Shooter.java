@@ -192,9 +192,6 @@ public class Shooter extends SubsystemBase {
       ct_left.set(rpm / RPM);
       ct_right.set(ct_left.get());
 
-      //kRPM  = rpm;
-      //_pidEnc.setReference(rpm, CANSparkMax.ControlType.kVelocity);
-      //*/
     }
 
     // YAW
@@ -248,7 +245,7 @@ public class Shooter extends SubsystemBase {
     // RETORNA INDENTIFICAÇAO
     public boolean isLimelightDetected() {
 
-      return tv.getDouble(0.0) == 1.0 ? true : false;
+      return tv.getDouble(0.0) == 1.0;
   
     }
   
