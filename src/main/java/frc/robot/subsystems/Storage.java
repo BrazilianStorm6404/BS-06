@@ -36,7 +36,7 @@ public class Storage extends SubsystemBase {
     }
 
     // DEFININDO OS SENSORES DO SISTEMA DE ARMAZENADOR
-    sn_photS = new DigitalInput(Constants.Sensors.STORAGE);
+    //sn_photS = new DigitalInput(Constants.Sensors.STORAGE);
   }
 
   // CRIANDO FUNCAO DO ARMAZENADOR

@@ -178,8 +178,8 @@ public class Shooter extends SubsystemBase {
 
   public void chute(boolean pitchDualMove) {
 
-    limelightPitchControl(pitchDualMove);
-    setActivate(0.9);
+    //limelightPitchControl(pitchDualMove);
+    setActivate(0.7);
   
     }
 

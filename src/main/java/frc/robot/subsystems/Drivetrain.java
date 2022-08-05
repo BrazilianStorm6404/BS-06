@@ -125,10 +125,10 @@ public class Drivetrain extends SubsystemBase {
     }
    
     //corrctVel = v * _autEncPID.calculate((ct_rBack.getSelectedSensorPosition() + ct_rBack.getSelectedSensorPosition()) / 2);
-    corrctVel = v * (((dist * 100) - ((ct_rBack.getSelectedSensorPosition() + ct_lBack.getSelectedSensorPosition()) / 2)) * 0.00025);
+    corrctVel = v * (((dist * 100) - ((ct_rBack.getSelectedSensorPosition() + ct_lBack.getSelectedSensorPosition()) / 2)) * 0.00017);
     if (corrctVel > v) {
       corrctVel = v;
-    }
+    } 
     direction(0, corrctVel);
 
     if (((dist * 100) - ((ct_rBack.getSelectedSensorPosition() + ct_lBack.getSelectedSensorPosition()) / 2)) > 1000) m = false;

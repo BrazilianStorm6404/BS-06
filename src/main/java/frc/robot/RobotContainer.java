@@ -2,6 +2,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.PS4Controller;
 // IMPORTS
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
@@ -25,7 +26,7 @@ public class RobotContainer {
 
   // CONTROLES (PILOTO E CO_PILOTO)
   XboxController pilot, coPilot;
-  //Joystick coPilot;
+  //PS4Controller coPilot;
   
 
   // SUBSISTEMA COM PADRAO M_ NA FRENTE
@@ -54,6 +55,7 @@ public class RobotContainer {
     // DEFININDO CONTROLES (PILOTO E CO_PILOTO)
     pilot   = new XboxController(Constants.Control_map.PILOT);
     coPilot = new XboxController(Constants.Control_map.CO_PILOT);
+    //coPilot = new PS4Controller(Constants.Control_map.CO_PILOT);
 
     // DEFININDO SUBSISTEMAS NO CONTAINER
     sb_Camera    = new Camera();
@@ -73,13 +75,13 @@ public class RobotContainer {
     resetSto = true;
     reset    = true;
 
-    configureButtonBindings();
+    //configureButtonBindings();
  
     //#endregion
   
   }
 
-  private void configureButtonBindings() {
+  public void configureButtonBindings() {
 
     //DRIVETRAIN
     //try { 
@@ -121,7 +123,7 @@ public class RobotContainer {
         } else sb_collector.collect(0.0);
         //*/
 
-        if (pilot.getRightTriggerAxis() >0) {
+        if (pilot.getRightTriggerAxis() > 0) {
 
           sb_collector.collect(-0.7);
 
@@ -187,7 +189,7 @@ public class RobotContainer {
       }
 
       
-      
+     /* 
       if (sb_shooter.isLimelightDetected()) {
         
         sb_shooter.limelightYawControl(); // CONTROLE AUTOMATICO PITCH/YAW LIMELIGHT
@@ -229,17 +231,17 @@ public class RobotContainer {
         if (coPilot.getRightTriggerAxis() > 0) {
 
           sb_storge.setFeeder(-0.9);
-          sb_storge.setConveyor(1);
+          sb_storge.setConveyor(0.8);
 
         } else if (pilot.getRightTriggerAxis() > 0) {
 
           sb_storge.setFeeder(-0.8);
-          sb_storge.setConveyor(-1);
+          sb_storge.setConveyor(-0.8);
 
         } else if (pilot.getLeftTriggerAxis() > 0) {
 
           sb_storge.setFeeder(0.8);
-          sb_storge.setConveyor(-1);
+          sb_storge.setConveyor(-0.8);
 
         } else {
 

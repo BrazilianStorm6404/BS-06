@@ -15,7 +15,7 @@ public class Climber extends SubsystemBase {
   private VictorSPX at_rSol, at_lSol;
 
   public Climber() {
-
+/*
     // DEFININDO OS CONTROLADORS DO SISTEMA DE ESCALADA
     try {
       at_rSol = new VictorSPX(Constants.Soleinoid.CLIMBER);
@@ -28,7 +28,7 @@ public class Climber extends SubsystemBase {
       System.out.printf("\n\nERRO NA BUSCA DE CONTROLADOR, LINHA: %s\n\n", ex.getStackTrace()[0]);
       return;
 
-    }
+    }*/
   }
 
   // FUNCAO DO SISTEMA DE ESCALADA

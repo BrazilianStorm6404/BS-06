@@ -18,7 +18,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
 
-    NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(3);
+    NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
 
     try {
 
@@ -67,7 +67,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
 
-    NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(3);
+    NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
     
     try {
 
@@ -80,6 +80,8 @@ public class Robot extends TimedRobot {
       System.out.println("Erro em "+this.getClass()+": Erro ao executar código tele-operado");
       
     }
+
+    _robotContainer.configureButtonBindings();
     
   }
 

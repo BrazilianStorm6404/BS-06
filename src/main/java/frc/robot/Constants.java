@@ -40,14 +40,11 @@ public final class Constants {
 
     public static class Soleinoid {
         public static final int COLETOR = 6;
-        public static final int CLIMBER = 7;
     }
 
     public static class Sensors {
-        public static final int STORAGE      = 8;
         public static final int LIMIT_RIGHT  = 0;
         public static final int LIMIT_LEFT   = 1;
-        public static final int LIMIT_CENTER = 5;
     }
 
     public static class Encoders {
