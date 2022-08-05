@@ -45,13 +45,12 @@ public final class Constants {
 
     public static class Sensors {
         public static final int STORAGE      = 8;
-        public static final int LIMIT_RIGHT  = 3;
-        public static final int LIMIT_LEFT   = 4;
+        public static final int LIMIT_RIGHT  = 0;
+        public static final int LIMIT_LEFT   = 1;
         public static final int LIMIT_CENTER = 5;
     }
 
     public static class Encoders {
-        public static final int PITCH       = 0;
         public static final int SHOOTER     = 0;
         public static final int DRIVE_LEFT  = 1;
         public static final int DRIVE_RIGHT = 2;

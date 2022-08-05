@@ -25,7 +25,7 @@ public class RobotContainer {
 
   // CONTROLES (PILOTO E CO_PILOTO)
   XboxController pilot, coPilot;
-  Joystick logPilot;
+  //Joystick coPilot;
   
 
   // SUBSISTEMA COM PADRAO M_ NA FRENTE
@@ -54,7 +54,6 @@ public class RobotContainer {
     // DEFININDO CONTROLES (PILOTO E CO_PILOTO)
     pilot   = new XboxController(Constants.Control_map.PILOT);
     coPilot = new XboxController(Constants.Control_map.CO_PILOT);
-    logPilot = new Joystick(3);
 
     // DEFININDO SUBSISTEMAS NO CONTAINER
     sb_Camera    = new Camera();
@@ -89,7 +88,7 @@ public class RobotContainer {
         //SmartDashboard.putNumber("Y", logPilot.getRawAxis(1));
         //SmartDashboard.putNumber("X", logPilot.getRawAxis(4));
 
-        sb_drive.direction(logPilot.getRawAxis(4), -logPilot.getRawAxis(1));
+        sb_drive.direction(pilot.getRightX(), -pilot.getLeftY());
 
       }, sb_drive));// } catch (Exception ex) { errMesg(ex); }
   //*/
@@ -187,8 +186,7 @@ public class RobotContainer {
 
       }
 
-      //sb_shooter.rotation(coPilot.getRightX());
-      //sb_shooter.rotation(coPilot.getRightX());
+      
       
       if (sb_shooter.isLimelightDetected()) {
         
@@ -231,17 +229,17 @@ public class RobotContainer {
         if (coPilot.getRightTriggerAxis() > 0) {
 
           sb_storge.setFeeder(-0.9);
-          sb_storge.setConveyor(0.9);
+          sb_storge.setConveyor(1);
 
         } else if (pilot.getRightTriggerAxis() > 0) {
 
           sb_storge.setFeeder(-0.8);
-          sb_storge.setConveyor(-0.9);
+          sb_storge.setConveyor(-1);
 
         } else if (pilot.getLeftTriggerAxis() > 0) {
 
           sb_storge.setFeeder(0.8);
-          sb_storge.setConveyor(-0.8);
+          sb_storge.setConveyor(-1);
 
         } else {
 

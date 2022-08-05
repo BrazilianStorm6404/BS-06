@@ -35,8 +35,8 @@ public class Autonomo extends CommandBase {
     table = NetworkTableInstance.getDefault().getTable("limelight");
 
     table.getEntry("ledMode").setNumber(3);
-    table.getEntry("camMode").setNumber(1);
-    table.getEntry("pipeline").setNumber(2);
+    //table.getEntry("camMode").setNumber(1);
+    //table.getEntry("pipeline").setNumber(2);
 
 
     addRequirements(dr);
@@ -63,8 +63,9 @@ public class Autonomo extends CommandBase {
 
   @Override
   public void initialize() {
-    //t_drive.start();
-
+    t_drive.reset();
+    t_drive.start();
+    sb_drive.resetEnc();
     
   }
 
@@ -75,9 +76,10 @@ public class Autonomo extends CommandBase {
   @Override
   public void execute() {
 
-    if (!sb_drive.isMove() && et1) {
+    if (et1 && !sb_drive.isMove()) {
 
-      sb_drive.distancia(0.5, -100);
+      //sb_drive.direction(0, 0.4);
+      sb_drive.distancia(0.5, -200);
 
     } else {
 
@@ -85,6 +87,7 @@ public class Autonomo extends CommandBase {
       t_drive.start();
 
     }
+    SmartDashboard.putBoolean("aaaa", sb_drive.isMove());
 
     if (!et1 && t_drive.get() <= 2) {
 
@@ -114,9 +117,9 @@ public class Autonomo extends CommandBase {
         t_drive.stop();
         sb_shooter.servoDisable(true);
         isFinished = true;
-      }
+      } else sb_shooter.resetPitch();
 
-    } else sb_shooter.resetPitch();
+    } 
 
 
 

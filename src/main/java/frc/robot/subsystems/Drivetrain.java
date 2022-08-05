@@ -40,7 +40,7 @@ public class Drivetrain extends SubsystemBase {
   private DifferentialDrive _drive;
 
   private Timer t_moveTime;
-  private boolean move;
+  private boolean move, m;
 
   //#endregion
 
@@ -87,14 +87,15 @@ public class Drivetrain extends SubsystemBase {
     
     ct_rBack.setSelectedSensorPosition(0);
     ct_lBack.setSelectedSensorPosition(0);
-    
+    /*
     _autEncPID = new PIDController(0.000013, 0.0, 0.0);
 
     _autEncPID.setSetpoint(0);
 
     _autEncPID.setTolerance(1000);
-
+*/
     move = false;
+    m = false;
 
     //#endregion
 
@@ -116,21 +117,31 @@ public class Drivetrain extends SubsystemBase {
   
       //t_moveTime.reset();
   
-      _autEncPID.setSetpoint(dist * 170);
+
+     // _autEncPID.setSetpoint(dist * 170);
 
       move = true;
 
     }
    
-    corrctVel = v * _autEncPID.calculate((ct_rBack.getSelectedSensorPosition() + ct_rBack.getSelectedSensorPosition()) / 2);
+    //corrctVel = v * _autEncPID.calculate((ct_rBack.getSelectedSensorPosition() + ct_rBack.getSelectedSensorPosition()) / 2);
+    corrctVel = v * (((dist * 100) - ((ct_rBack.getSelectedSensorPosition() + ct_lBack.getSelectedSensorPosition()) / 2)) * 0.00025);
+    if (corrctVel > v) {
+      corrctVel = v;
+    }
     direction(0, corrctVel);
 
-    if (_autEncPID.atSetpoint()) move = false;
+    if (((dist * 100) - ((ct_rBack.getSelectedSensorPosition() + ct_lBack.getSelectedSensorPosition()) / 2)) > 1000) m = false;
     
     
   }//*/
 
-  public boolean isMove(){ return _autEncPID.atSetpoint(); }
+  public boolean isMove(){ return m; }
+
+  public void resetEnc(){
+    ct_rBack.setSelectedSensorPosition(0);
+    ct_lBack.setSelectedSensorPosition(0);
+  }
 
   // PERIODICA
   @Override

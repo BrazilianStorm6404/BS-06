@@ -62,8 +62,8 @@ public class Shooter extends SubsystemBase {
     RPM      = 21000;
     kRPM     = 0;
 
-    minAngle = 16;
-    maxAngle = 40;
+    minAngle = -12;
+    maxAngle = 18;
     maxPos   = .5;
 
     sn_limitLeft  = new DigitalInput(Constants.Sensors.LIMIT_LEFT);
@@ -179,7 +179,7 @@ public class Shooter extends SubsystemBase {
   public void chute(boolean pitchDualMove) {
 
     limelightPitchControl(pitchDualMove);
-    setActivate(10000);
+    setActivate(0.9);
   
     }
 
@@ -189,7 +189,7 @@ public class Shooter extends SubsystemBase {
     // ATIVA O SHOOTER
     public void setActivate(double rpm){
 
-      ct_left.set(rpm / RPM);
+      ct_left.set(rpm);
       ct_right.set(ct_left.get());
 
     }
@@ -229,13 +229,16 @@ public class Shooter extends SubsystemBase {
 
     public void servoDisable (boolean dual) {
 
+      /*
       if (dual){
 
         at_pitchR.setDisabled();
         at_pitchL.setDisabled();
       
       } else at_pitchL.setDisabled();
-
+      */
+      at_pitchR.setDisabled();
+      at_pitchL.setDisabled();
     }
   
   //#endregion
@@ -271,7 +274,7 @@ public class Shooter extends SubsystemBase {
     public void limelightPitchControl(boolean dual) {
 
       // Relaçao proporcional (linha direta)
-      pitchPos = minAngle;//_ty.getDouble(_maxPosition);//SmartDashboard.getNumber("LL Angle", 16.0);
+      pitchPos = ty.getDouble(maxAngle);//SmartDashboard.getNumber("LL Angle", 16.0);
       pitchPos = pitchPos - maxAngle;
       pitchPos = pitchPos / ((minAngle - maxAngle) / maxPos);
   
@@ -289,8 +292,9 @@ public class Shooter extends SubsystemBase {
   
       //SmartDashboard.putNumber("pitchPos", _pitchPos);
   
-      if (dual) at_pitchL.set(pitchPos);
+      //if (dual) at_pitchL.set(pitchPos);
   
+      at_pitchL.set(pitchPos);
       at_pitchR.set(-pitchPos + 0.5);
   
     }
@@ -309,6 +313,11 @@ public class Shooter extends SubsystemBase {
 
     SmartDashboard.putNumber("Servo 0", at_pitchR.get());
     SmartDashboard.putNumber("Servo 1", at_pitchL.get());
+
+    SmartDashboard.putBoolean("Limit Right", sn_limitRight.get());
+    SmartDashboard.putBoolean("Limit Left", sn_limitLeft.get());
+
+    SmartDashboard.putNumber("LL Y", ty.getDouble(0));
 
   }
 
